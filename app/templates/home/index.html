@@ -1,0 +1,15 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block content%}
+    <h1>this is homepage content</h1>
+{% endblock %}
+
+{% block jsScript %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Home Page Ready...!')
+        })
+    </script>
+{% endblock %}

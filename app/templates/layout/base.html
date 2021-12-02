@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> {% block title %}{% endblock %} | TPP Network Mapping</title>
+    
+    <!-- Normalize.css -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='global/css/reset.css')}}">
+
+    <!-- global style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='global/css/style.css')}}">
+
+    <!-- custom style -->
+    {% block style %}{% endblock %}
+</head>
+<!-- Page inline style -->
+{% block inlineStyle %}{% endblock %}
+<body>
+    <!-- Flash Error -->
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    <div class="{{ category }}">{{ message }}</div>
+    {% endfor %}
+
+    <!-- Page content -->
+    {% block content %}{% endblock %}
+
+    <!-- Page js script -->
+    {% block jsScript%}{% endblock %}
+</body>
+</html>

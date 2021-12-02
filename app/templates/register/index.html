@@ -1,0 +1,37 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Register User{% endblock %}
+
+{% block content %}
+    <form action="/register" method="post">
+        <div>
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username">
+        </div>
+
+        <div>
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password">
+        </div>
+
+        <div>
+            <label for="isAdmin">Admin user</label>
+            <input type="radio" name="is_admin" value="true" id="isAdmin">
+
+            <label for="isNotAdmin">regular user</label>
+            <input type="radio" name="is_admin" value="false" checked id="isNotAdmin">
+        </div>
+
+        <div>
+            <label for="isActive">active user</label>
+            <input type="radio" name="is_active" value="true" checked id="isActive">
+
+            <label for="isNotActive">inactive user</label>
+            <input type="radio" name="is_active" value="false" id="isNotActive">
+        </div>
+
+        <div>
+            <input type="submit" value="Login">
+        </div>
+    </form>
+{% endblock %}
