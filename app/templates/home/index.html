@@ -2,14 +2,63 @@
 
 {% block title %}Home Page{% endblock %}
 
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='home/css/style.css')}}">
+<link rel="stylesheet" href="{{ url_for('static', filename='home/css/leaflet.css')}}">
+{% endblock %}
+
+{% block inlineStyle %}
+ <style>
+     #map { height: 93.7vh; }
+ </style>
+{% endblock %}
+
 {% block content%}
-    <h1>this is homepage content</h1>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <h1>this is homepage content</h1>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <h1> welcome {{ user }}</h1>
+            </div>
+            <div class="col-sm-12 col-md-12">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block jsScript %}
+    <script src="{{ url_for('static', filename='home/js/leaflet.js')}}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('Home Page Ready...!')
+            let cities = L.layerGroup()
+            let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+            let POIInfo = `
+                <p style="text-align: center; font-size: 20px;">Kantor Pemerintahan Kabupaten Tapin</p>
+                <br />
+                <img style="width: 100%; height: 200px;" src="https://i.pravatar.cc/200?img=60">
+            `
+            let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1 })
+            let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1 })
+            let satellite = L.tileLayer(tileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1 })
+
+            let map = L.map('map', {
+                zoom: 15,
+                layers: [satellite, cities],
+                center: [-2.928304, 115.1611323]
+            })
+
+            let baseLayers = {
+                "Satellite": satellite,
+                "Streets": streets,
+                "Grayscale": grayscale,
+            };
+
+            L.marker([-2.932543, 115.162629]).addTo(map).bindPopup(POIInfo)
+            L.control.layers(baseLayers).addTo(map);
+            L.control.scale().addTo(map)
         })
     </script>
 {% endblock %}

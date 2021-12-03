@@ -29,7 +29,7 @@ def logged_in_user():
 @public.route('/')
 @login
 def public_index():
-    return render_template('home/index.html')
+    return render_template('home/index.html', user=g.user.username)
 
 
 @public.route('/register', methods=['GET', 'POST'])
@@ -93,7 +93,7 @@ def public_login():
                     if verify:
                         session.clear()
                         session['user_id'] = user.id
-                        flash('welcome', 'info')
+                        flash(f'welcome {username}', 'info')
                         return redirect(
                             url_for('public_controller.public_index')
                         )
@@ -112,7 +112,7 @@ def public_login():
 
 @public.route('/logout')
 @login
-def logout():
+def public_logout():
     session.clear()
     flash(f'Bye {g.user.username}', 'info')
     return redirect(url_for('public_controller.public_login'))
