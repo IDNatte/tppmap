@@ -2,12 +2,12 @@ from flask import Flask
 from flask_migrate import Migrate
 
 from .controller import public_controller
+# from .shared import LMANAGER
 from .shared import CSRF
 from .shared import DB
 
+# from .model import User
 # from .model import *
-
-# config
 
 
 def init_app(test_config=None):

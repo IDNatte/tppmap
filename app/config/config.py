@@ -1,3 +1,4 @@
 SECRET_KEY = 'AutoSecretKey2201'
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:admin123@localhost/tppmap'
+COOKIE_TIMEOUT = 60*60*24*7

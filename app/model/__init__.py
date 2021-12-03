@@ -24,6 +24,9 @@ class User(DB.Model):
         DB.session.add(self)
         DB.session.commit()
 
+    def rollback(self):
+        DB.session.rollback()
+
     def update(self):
         DB.session.commit()
 

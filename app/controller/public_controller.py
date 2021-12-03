@@ -1,6 +1,8 @@
-from werkzeug.utils import redirect
 from flask import render_template
+from flask import make_response
+from flask import current_app
 from flask import Blueprint
+from flask import redirect
 from flask import url_for
 from flask import session
 from flask import request
@@ -18,12 +20,23 @@ public = Blueprint('public_controller', __name__)
 
 @public.before_app_request
 def logged_in_user():
-    user_id = session.get('user_id')
+    if request.cookies.get('_remember') == 'remember':
+        user_by_cookies = request.cookies.get('user_id')
+        g.user = User.query.get(user_by_cookies)
+        g.username = request.cookies.get('_username')
+        g.remember = request.cookies.get('_remember')
 
-    if user_id is None:
-        g.user = None
+    elif request.cookies.get('_remember') is None:
+        user_by_session = session.get('user_id')
+        if user_by_session is None:
+            g.user = None
+            g.remember = request.cookies.get('_remember')
+        else:
+            g.user = User.query.get(user_by_session)
+            g.remember = request.cookies.get('_remember')
     else:
-        g.user = User.query.get(user_id)
+        g.user = None
+        g.remember = request.cookies.get('_remember')
 
 
 @public.route('/')
@@ -49,14 +62,14 @@ def public_register():
         validator = [username, password, is_admin, is_active]
 
         if '' not in validator:
-            if is_admin == 'true':
+            if is_admin == 'on':
                 admin = True
-            elif is_admin == 'false':
+            else:
                 admin = False
 
-            if is_active == 'true':
+            if is_active == 'on':
                 active = True
-            elif is_active == 'false':
+            else:
                 active = False
 
             try:
@@ -68,6 +81,7 @@ def public_register():
                 return redirect(url_for('public_controller.public_login'))
 
             except (sqlalchemy.exc.IntegrityError):
+                user.rollback()
                 flash('user already registered !', 'error')
                 return render_template('register/index.html')
 
@@ -81,6 +95,7 @@ def public_login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        rememberMe = request.form.get('rememberMe')
 
         if username:
             if password:
@@ -91,12 +106,57 @@ def public_login():
                     verify = verifyPassword(user.password, password)
 
                     if verify:
-                        session.clear()
-                        session['user_id'] = user.id
-                        flash(f'welcome {username}', 'info')
-                        return redirect(
-                            url_for('public_controller.public_index')
-                        )
+                        if rememberMe == 'remember':
+                            response = make_response(
+                                redirect(
+                                    url_for(
+                                        'public_controller.public_index'
+                                    )
+                                )
+                            )
+
+                            response.set_cookie(
+                                'user_id',
+                                user.id,
+                                max_age=current_app.config.get(
+                                    'COOKIE_TIMEOUT'
+                                )
+                            )
+
+                            response.set_cookie(
+                                '_remember',
+                                rememberMe,
+                                max_age=current_app.config.get(
+                                    'COOKIE_TIMEOUT'
+                                )
+                            )
+
+                            response.set_cookie(
+                                '_username',
+                                username,
+                                max_age=current_app.config.get(
+                                    'COOKIE_TIMEOUT'
+                                )
+                            )
+
+                            flash(f'welcome {username}', 'info')
+                            return response
+                        else:
+                            response = redirect(
+                                url_for(
+                                    'public_controller.public_index'
+                                )
+                            )
+
+                            session.clear()
+                            session['user_id'] = user.id
+
+                            response.delete_cookie('user_id')
+                            response.delete_cookie('_remember')
+                            response.delete_cookie('_username')
+
+                            flash(f'welcome {username}', 'info')
+                            return response
                     else:
                         flash('Password wrong', 'error')
                 else:
@@ -107,12 +167,30 @@ def public_login():
         else:
             flash('No username provided !', 'error')
 
-    return render_template('login/index.html')
+    elif request.method == 'GET':
+        if g.user is not None:
+            return redirect(url_for('public_controller.public_index'))
+
+        else:
+            return render_template('login/index.html')
 
 
 @public.route('/logout')
 @login
 def public_logout():
-    session.clear()
-    flash(f'Bye {g.user.username}', 'info')
-    return redirect(url_for('public_controller.public_login'))
+    if g.remember == 'remember':
+        response = make_response(
+            redirect(
+                url_for(
+                    'public_controller.public_login'
+                )
+            )
+        )
+
+        response.delete_cookie('user_id')
+        return response
+
+    else:
+        session.clear()
+        flash(f'Bye {g.user.username}', 'info')
+        return redirect(url_for('public_controller.public_login'))
