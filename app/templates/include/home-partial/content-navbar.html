@@ -161,10 +161,17 @@
                     <a class="nav-link dropdown-toggle pt-1 px-0" href="#" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         <div class="media d-flex align-items-center">
-                            <img class="avatar rounded-circle" alt="Image placeholder"
-                                src="{{ url_for('static', filename='global/assets/images/team/profile-picture-3.jpg')}}">
+                            {% if g.rember == 'remember' %}
+                            <img class="avatar rounded-circle" alt="Image placeholder" src="https://ui-avatars.com/api/?rounded=true&background=random&name={{ g.username }}">
+                            {% else %}
+                            <img class="avatar rounded-circle" alt="Image placeholder" src="https://ui-avatars.com/api/?rounded=true&background=random&name={{ g.user.username}}">
+                            {% endif %}
                             <div class="media-body ms-2 text-dark align-items-center d-none d-lg-block">
-                                <span class="mb-0 font-small fw-bold text-gray-900">Bonnie Green</span>
+                                {% if g.remember == 'remember' %}
+                                <span class="mb-0 font-small fw-bold text-gray-900">Hi, {{ g.username }}</span>
+                                {% else %}
+                                <span class="mb-0 font-small fw-bold text-gray-900">Hi, {{ g.user.username }}</span>
+                                {% endif %}
                             </div>
                         </div>
                     </a>

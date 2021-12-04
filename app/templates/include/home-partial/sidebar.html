@@ -4,11 +4,18 @@
             class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
             <div class="d-flex align-items-center">
                 <div class="avatar-lg me-4">
-                    <img src="{{ url_for('static', filename='global/assets/images/team/profile-picture-3.jpg')}}"
-                        class="card-img-top rounded-circle border-white" alt="Bonnie Green">
+                    {% if g.rember == 'remember' %}
+                    <img class="card-img-top rounded-circle border-white" alt="{{ g.username }}" src="https://ui-avatars.com/api/?rounded=true&background=random&name={{ g.username }}">
+                    {% else %}
+                    <img class="card-img-top rounded-circle border-white" alt="{{ g.user.username}}" src="https://ui-avatars.com/api/?rounded=true&background=random&name={{ g.user.username}}">
+                    {% endif %}
                 </div>
                 <div class="d-block">
-                    <h2 class="h5 mb-3">Hi, Jane</h2>
+                    {% if g.remember == 'remember' %}
+                    <h2 class="h5 mb-3">Hi, {{ g.username }}</h2>
+                    {% else %}
+                    <h2 class="h5 mb-3">Hi, {{ g.user.username }}</h2>
+                    {% endif %}
                     <a href="{{ url_for('public_controller.public_logout')}}"
                         class="btn btn-secondary btn-sm d-inline-flex align-items-center">
                         <svg class="icon icon-xxs me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
