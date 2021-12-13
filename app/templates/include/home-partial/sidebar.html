@@ -5,9 +5,11 @@
             <div class="d-flex align-items-center">
                 <div class="avatar-lg me-4">
                     {% if g.rember == 'remember' %}
-                    <img class="card-img-top rounded-circle border-white" alt="{{ g.username }}" src="https://ui-avatars.com/api/?rounded=true&background=random&name={{ g.username }}">
+                    <img class="card-img-top rounded-circle border-white" alt="{{ g.username }}"
+                        src="https://ui-avatars.com/api/?rounded=true&background=random&name={{ g.username }}">
                     {% else %}
-                    <img class="card-img-top rounded-circle border-white" alt="{{ g.user.username}}" src="https://ui-avatars.com/api/?rounded=true&background=random&name={{ g.user.username}}">
+                    <img class="card-img-top rounded-circle border-white" alt="{{ g.user.username}}"
+                        src="https://ui-avatars.com/api/?rounded=true&background=random&name={{ g.user.username}}">
                     {% endif %}
                 </div>
                 <div class="d-block">
@@ -44,7 +46,8 @@
             <li class="nav-item">
                 <a href="../../index.html" class="nav-link d-flex align-items-center">
                     <span class="sidebar-icon">
-                        <img src="{{ url_for('static', filename='global/assets/images/brand/tppmap.svg')}}" height="20" width="20" alt="Volt Logo">
+                        <img src="{{ url_for('static', filename='global/assets/images/brand/tppmap.svg')}}" height="20"
+                            width="20" alt="Volt Logo">
                     </span>
                     <span class="mt-1 ms-1 sidebar-text">TPP Map</span>
                 </a>
@@ -75,7 +78,7 @@
                     <span class="sidebar-text">Transactions</span>
                 </a>
             </li>
-            <li class="nav-item ">
+            <!-- <li class="nav-item ">
                 <a href="../../pages/settings.html" class="nav-link">
                     <span class="sidebar-icon">
                         <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20"
@@ -87,8 +90,8 @@
                     </span>
                     <span class="sidebar-text">Settings</span>
                 </a>
-            </li>
-            <li class="nav-item">
+            </li> -->
+            <!-- <li class="nav-item">
                 <span class="nav-link  collapsed  d-flex justify-content-between align-items-center"
                     data-bs-toggle="collapse" data-bs-target="#submenu-app">
                     <span>
@@ -120,7 +123,7 @@
                         </li>
                     </ul>
                 </div>
-            </li>
+            </li> -->
             <li class="nav-item">
                 <span class="nav-link  collapsed  d-flex justify-content-between align-items-center"
                     data-bs-toggle="collapse" data-bs-target="#submenu-pages">

@@ -10,6 +10,9 @@ from flask import flash
 from flask import g
 import sqlalchemy
 
+# Testing error endpoint
+from flask import abort
+
 from app.model.helper import verifyPassword
 from app.model import User
 

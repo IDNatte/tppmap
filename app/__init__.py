@@ -2,6 +2,7 @@ from flask import Flask
 from flask_migrate import Migrate
 
 from .controller import public_controller
+from .controller import error_handler
 # from .shared import LMANAGER
 from .shared import CSRF
 from .shared import DB
@@ -20,5 +21,6 @@ def init_app(test_config=None):
 
     # route / controller
     app.register_blueprint(public_controller.public)
+    app.register_blueprint(error_handler.error_controller)
 
     return app
