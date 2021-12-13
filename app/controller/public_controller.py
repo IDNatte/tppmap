@@ -45,7 +45,7 @@ def logged_in_user():
 @public.route('/')
 @login
 def public_index():
-    return render_template('home/index.html', user=g.user.username)
+    return render_template('home/index.html', user=g.user.username, active=True)
 
 
 @public.route('/register', methods=['GET', 'POST'])
@@ -197,3 +197,12 @@ def public_logout():
         session.clear()
         flash(f'Bye {g.user.username}', 'info')
         return redirect(url_for('public_controller.public_login'))
+
+
+@public.route('/add', methods=['GET', 'POST'])
+@login
+def public_add():
+    if request.method == 'POST':
+        return render_template('add/index.html', active=True)
+
+    return render_template('add/index.html', active=True)
