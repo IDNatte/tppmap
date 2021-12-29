@@ -8,7 +8,7 @@ from .shared import CSRF
 from .shared import DB
 
 # from .model import User
-# from .model import *
+from .model import *
 
 
 def init_app(test_config=None):
