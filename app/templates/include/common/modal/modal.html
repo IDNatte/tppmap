@@ -1,3 +1,40 @@
+<!-- Tambah Tower -->
+<div class="modal fade" id="modal-add__tower" tabindex="-1" role="dialog" aria-labelledby="modal-add__tower"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="h6 modal-title">Tambah lokasi tower</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="/add" method="post" class="container-fluid">
+          {% include 'include/form/_formcsrf.html' %}
+
+          <div class="row">
+            <div class="col-sm-12 col-md-6 mb-3">
+              <label for="tower-latitude" class="form-label">Latitude</label>
+              <input type="text" class="form-control" id="tower-latitude" placeholder="latitude tower Eg. -2.933880">
+              <div id="tower-latitude__help" class="form-text"><a href="{{ url_for('public_controller.public_help')}}" target="_blank">Bantuan</a></div>
+            </div>
+            <div class="col-sm-12 col-md-6 mb-3">
+              <label for="tower-latitude" class="form-label">Longitude</label>
+              <input type="text" class="form-control" id="tower-latitude" placeholder="longitude tower Eg. 115.1611323">
+              <div id="tower-latitude__help" class="form-text"><a href="{{ url_for('public_controller.public_help')}}" target="_blank">Bantuan</a></div>
+            </div>
+          </div>
+
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="btn btn-primary mb-3" type="submit">Tambah</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Tambah Tower -->
+
 <!-- Laporan kerusakan -->
 <div class="modal fade" id="modal-report-kerusakan" tabindex="-1" role="dialog" aria-labelledby="modal-default"
   aria-hidden="true">

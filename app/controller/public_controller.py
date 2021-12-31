@@ -11,7 +11,7 @@ from flask import g
 import sqlalchemy
 
 # Testing error endpoint
-from flask import abort
+# from flask import abort
 
 from app.model.helper import verifyPassword
 from app.model import User
@@ -45,7 +45,7 @@ def logged_in_user():
 @public.route('/')
 @login
 def public_index():
-    return render_template('home/index.html', user=g.user.username, active=True)
+    return render_template('home/index.html', user=g.user.username)
 
 
 @public.route('/register', methods=['GET', 'POST'])
@@ -203,6 +203,13 @@ def public_logout():
 @login
 def public_add():
     if request.method == 'POST':
-        return render_template('add/index.html', active=True)
+        print('penambahan data')
+        return render_template('home/index.html')
 
-    return render_template('add/index.html', active=True)
+    return render_template('home/index.html')
+
+
+@public.route('/help')
+@login
+def public_help():
+    return render_template('help/index.html')
