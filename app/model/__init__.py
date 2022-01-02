@@ -1,3 +1,4 @@
+from enum import unique
 from app.model.helper import random_id_generator
 from app.model.helper import passwordHash
 from app.shared import DB
@@ -52,8 +53,8 @@ class MapData(DB.Model):
     address = DB.Column(DB.Text, nullable=False)
     isp_provider = DB.Column(DB.String(200), nullable=False)
     installation_date = DB.Column(DB.DateTime, default=datetime.datetime.now)
-    move_date = DB.Column(DB.DateTime, default=datetime.datetime.now)
-    damage_date = DB.Column(DB.DateTime, default=datetime.datetime.now)
+    move_date = DB.Column(DB.DateTime)
+    damage_date = DB.Column(DB.DateTime)
     is_repaired = DB.Column(DB.Boolean, default=False)
     is_moved = DB.Column(DB.Boolean, default=False)
     repair_report = DB.Column(DB.Text)
@@ -73,7 +74,6 @@ class MapData(DB.Model):
                  repair_report,
                  damage_report,
                  move_location):
-        self.id = id
         self.latlang = latlang
         self.address = address,
         self.isp_provider = isp_provider
@@ -87,12 +87,19 @@ class MapData(DB.Model):
         self.damage_report = damage_report
         self.move_location = move_location
 
+    def save(self):
+        DB.session.add(self)
+        DB.session.commit()
+
     def update(self):
         DB.session.commit()
 
     def delete(self):
         DB.session.delete(self)
         DB.session.commit()
+
+    def rollback(self):
+        DB.session.rollback()
 
     def get(self):
         return {

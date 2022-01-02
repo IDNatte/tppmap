@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='global/css/sweetalert2.min.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='global/css/notyf.min.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='global/css/volt.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='global/css/style.css')}}">
+
     
     <!-- custom style -->
     {% block style %}{% endblock %}
@@ -23,14 +25,21 @@
     <!-- Flash Error -->
     {% for category, message in get_flashed_messages(with_categories=true) %}
         {% if category == 'error'%}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
             <span>{{ message }}</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endif %}
 
         {% if category == 'info' %}
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <div class="alert alert-info alert-dismissible fade show custom-alert" role="alert">
+            <span>{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        {% if category == 'success' %}
+        <div class="alert alert-success alert-dismissible fade show custom-alert" role="alert">
             <span>{{ message }}</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>

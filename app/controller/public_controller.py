@@ -1,3 +1,4 @@
+import datetime
 from flask import render_template
 from flask import make_response
 from flask import current_app
@@ -8,13 +9,15 @@ from flask import session
 from flask import request
 from flask import flash
 from flask import g
-import sqlalchemy
 
-# Testing error endpoint
-# from flask import abort
+import sqlalchemy
+import json
 
 from app.model.helper import verifyPassword
+from app.model import MapData
 from app.model import User
+
+from app.helper import random_public_id
 
 from app.helper import login
 
@@ -45,7 +48,27 @@ def logged_in_user():
 @public.route('/')
 @login
 def public_index():
-    return render_template('home/index.html', user=g.user.username)
+
+    map_list = MapData.query.order_by(MapData.installation_date.desc()).all()
+    data_serializer = []
+    for map_item in map_list:
+        data_serializer.append({
+            "public_id": random_public_id(),
+            "latlang": json.loads(map_item.latlang),
+            "desc": map_item.desc,
+            "address": map_item.address,
+            "isp_provider": map_item.isp_provider,
+            "installation_date": map_item.installation_date.isoformat(),
+            "move_date": map_item.move_date,
+            "damage_date": map_item.damage_date,
+            "is_repaired": map_item.is_repaired,
+            "is_moved": map_item.is_moved,
+            "repair_report": map_item.repair_report,
+            "damage_report": map_item.damage_report,
+            "move_location": map_item.move_location,
+        })
+    print(data_serializer)
+    return render_template('home/index.html', user=g.user.username, map_list=data_serializer)
 
 
 @public.route('/register', methods=['GET', 'POST'])
@@ -174,8 +197,7 @@ def public_login():
         if g.user is not None:
             return redirect(url_for('public_controller.public_index'))
 
-        else:
-            return render_template('login/index.html')
+    return render_template('login/index.html')
 
 
 @public.route('/logout')
@@ -203,8 +225,51 @@ def public_logout():
 @login
 def public_add():
     if request.method == 'POST':
-        print('penambahan data')
-        return render_template('home/index.html')
+        try:
+            latlang = json.dumps({
+                "latitude": float(request.form.get('tower-latitude')),
+                "longitude": float(request.form.get('tower-longitude'))
+            })
+
+            address = request.form.get('tower-address')
+            isp_provider = request.form.get('tower-isp')
+            installation_date = datetime.datetime.now()
+            desc = request.form.get('tower-desc')
+            is_repaired = False
+            is_moved = False
+            repair_report = None
+            damage_report = None
+            move_location = None
+            damage_date = None
+            move_date = None
+
+            new_location = MapData(
+                latlang=latlang,
+                address=address,
+                isp_provider=isp_provider,
+                desc=desc,
+                installation_date=installation_date,
+                is_repaired=is_repaired,
+                is_moved=is_moved,
+                repair_report=repair_report,
+                damage_report=damage_report,
+                move_location=move_location,
+                move_date=move_date,
+                damage_date=damage_date
+            )
+
+            new_location.save()
+            flash('lokasi tersimpan', 'success')
+            return redirect(url_for('public_controller.public_index'))
+
+        except ValueError:
+            flash('Maaf penulisan koordinat lokasi salah', 'error')
+            return render_template('home/index.html')
+
+        except (sqlalchemy.exc.SQLAlchemyError):
+            new_location.rollback()
+            flash('maaf, terjadi gangguan pada server !', 'error')
+            return render_template('home/index.html')
 
     return render_template('home/index.html')
 

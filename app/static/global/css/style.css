@@ -1,7 +1,6 @@
-.error {
-  background-color: red;
-}
-
-.info {
-  background-color: aqua;
+.custom-alert {
+  z-index: 999 !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  right: 0 !important;
 }

@@ -1,3 +1,62 @@
+<!-- Generate modal based on public id from map list -->
+{% for map_data in map_list %}
+<div class="modal fade" id="tower-detail__{{map_data.public_id}}" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="h6 modal-title">Informasi Tower</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="container">
+                <div class="row">
+                  <div class="col-sm-12">
+                    <table class="table table-responsive">
+                      <thead>
+                        <tr>
+                          <th scope="col">Lokasi koordinat (lat, lang)</th>
+                          <th scope="col">Alamat</th>
+                          <th scope="col">Status perbaikan</th>
+                          <th scope="col">Keterangan</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>{{ map_data.latlang.latitude }}, {{ map_data.latlang.longitude }}</td>
+                          <td>{{ map_data.address}}</td>
+
+                          {% if map_data.is_repaired %}
+                          <td>
+                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dalam perbaikan">
+                              <svg class="icon" fill="#d2994a" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path></svg>
+                            </span>
+                          </td>
+                          {% else %}
+                          <td>
+                            <span data-bs-toggle="tooltip" data-bs-placement="bottom" title="Online">
+                              <svg class="icon" fill="#9bad51" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.05 3.636a1 1 0 010 1.414 7 7 0 000 9.9 1 1 0 11-1.414 1.414 9 9 0 010-12.728 1 1 0 011.414 0zm9.9 0a1 1 0 011.414 0 9 9 0 010 12.728 1 1 0 11-1.414-1.414 7 7 0 000-9.9 1 1 0 010-1.414zM7.879 6.464a1 1 0 010 1.414 3 3 0 000 4.243 1 1 0 11-1.415 1.414 5 5 0 010-7.07 1 1 0 011.415 0zm4.242 0a1 1 0 011.415 0 5 5 0 010 7.072 1 1 0 01-1.415-1.415 3 3 0 000-4.242 1 1 0 010-1.415zM10 9a1 1 0 011 1v.01a1 1 0 11-2 0V10a1 1 0 011-1z" clip-rule="evenodd"></path></svg> 
+                            </span>
+                          </td>
+                          {% endif %}
+
+                          <td>{{ map_data.desc}}</td>
+                          
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<!-- Generate modal based on public id from map list -->
+
 <!-- Tambah Tower -->
 <div class="modal fade" id="modal-add__tower" tabindex="-1" role="dialog" aria-labelledby="modal-add__tower"
   aria-hidden="true">
@@ -14,16 +73,68 @@
           <div class="row">
             <div class="col-sm-12 col-md-6 mb-3">
               <label for="tower-latitude" class="form-label">Latitude</label>
-              <input type="text" class="form-control" id="tower-latitude" placeholder="latitude tower Eg. -2.933880">
+              <input type="text" name="tower-latitude" class="form-control" id="tower-latitude" placeholder="latitude tower Eg. -2.933880" required>
               <div id="tower-latitude__help" class="form-text"><a href="{{ url_for('public_controller.public_help')}}" target="_blank">Bantuan</a></div>
             </div>
             <div class="col-sm-12 col-md-6 mb-3">
-              <label for="tower-latitude" class="form-label">Longitude</label>
-              <input type="text" class="form-control" id="tower-latitude" placeholder="longitude tower Eg. 115.1611323">
-              <div id="tower-latitude__help" class="form-text"><a href="{{ url_for('public_controller.public_help')}}" target="_blank">Bantuan</a></div>
+              <label for="tower-longitude" class="form-label">Longitude</label>
+              <input type="text" name="tower-longitude" class="form-control" id="tower-longitude" placeholder="longitude tower Eg. 115.1611323" required>
+              <div id="tower-longitude__help" class="form-text"><a href="{{ url_for('public_controller.public_help')}}" target="_blank">Bantuan</a></div>
             </div>
-          </div>
 
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label class="my-1 me-2" for="tower-isp">Nama ISP</label>
+              <select name="tower-isp" class="form-select" id="tower-isp" required>
+                  <option selected value="xl">Xl Axiata</option>
+                  <option value="simpati">Simpati</option>
+                  <option value="tri">Tri</option>
+              </select>
+              <div id="tower-isp__help" class="form-text">Pilih salah satu isp yang tersedia</div>
+            </div>
+
+            <!-- <div class="col-sm-12 col-md-6 mb-3">
+              <label class="my-1 me-2" for="tower-repairment_status">Status Perbaikan</label>
+              <select name="tower-repairement__status" class="form-select" id="tower-repairment_status">
+                  <option selected disabled>Pilih status perbaikan</option>
+                  <option value="tidak-perbaikan">Tidak dalam perbaikan</option>
+                  <option value="perbaikan">Dalam Perbaikan</option>
+              </select>
+            </div> -->
+
+            <!-- <div class="col-sm-12 col-md-12 mb-3">
+              <label class="my-1 me-2" for="tower-move_status">Status Pemindahan</label>
+              <select name="tower-moved__status" class="form-select" id="tower-move_status">
+                  <option selected disabled>Pilih status pemindahan</option>
+                  <option value="baru">Pemasangan awal</option>
+                  <option value="dipindahkan">Dipindahkan</option>
+              </select>
+            </div> -->
+
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label for="tower-address" class="form-label">Alamat tower</label>
+              <textarea name="tower-address" class="form-control" id="tower-address" required></textarea>
+            </div>
+
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label for="tower-desc" class="form-label">Keterangan</label>
+              <textarea name="tower-desc" class="form-control" id="tower-desc"></textarea>
+            </div>
+
+            <!-- <div style="border-bottom: 1px solid #e5e7eb; margin-top: 1.5rem; margin-bottom: 2rem;"></div> -->
+          
+            <!-- <div class="col-sm-12 col-md-6 mb-3">
+              <label for="tower-moved_description" class="form-label">Keterangan pemindahan</label>
+              <textarea name="tower-moved__desc" class="form-control" id="tower-moved_description"></textarea>
+              <div id="tower-moved_description__help" class="form-text">Biarkan kosong jika anda memilih "status pemindahan awal"</div>
+            </div>
+
+            <div class="col-sm-12 col-md-6 mb-3">
+              <label for="tower-damage_description" class="form-label">Keterangan kerusakan</label>
+              <textarea name="tower-damage__desc" class="form-control" id="tower-damage_description"></textarea>
+              <div id="tower-damage_description__help" class="form-text">Biarkan kosong jika anda memilih status perbaikan "Tidak dalam perbaikan"</div>
+            </div> -->
+
+          </div>
 
           <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <button class="btn btn-primary mb-3" type="submit">Tambah</button>

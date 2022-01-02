@@ -179,19 +179,26 @@
 <script src="{{ url_for('static', filename='home/js/leaflet.js')}}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+
+        function markerClick (modalTarget) {
+            // console.log(modalTarget)
+            let modalElement = document.getElementById(`tower-detail__${modalTarget}`)
+            let modal = bootstrap.Modal.getOrCreateInstance(modalElement)
+            // console.log(modal)
+
+            modal.show()
+            // console.log(`.tower-detail__${modalTarget}`)
+        }
+        
         let cities = L.layerGroup()
         let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
-        let POIInfo = `
-                <p style="text-align: center; font-size: 20px;">Kantor Pemerintahan Kabupaten Tapin</p>
-                <br />
-                <img style="width: 100%; height: 200px;" src="https://i.pravatar.cc/200?img=60">
-            `
+
         let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1 })
         let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1 })
         let satellite = L.tileLayer(tileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1 })
 
         let map = L.map('map', {
-            zoom: 15,
+            zoom: 11,
             layers: [grayscale, cities],
             center: [-2.928304, 115.1611323]
         })
@@ -202,7 +209,14 @@
             "Grayscale": grayscale,
         };
 
-        L.marker([-2.932543, 115.162629]).addTo(map).bindPopup(POIInfo)
+        let map_list = {{map_list|tojson}};
+
+        for (let map_item in map_list) {
+            L.marker([map_list[map_item].latlang.latitude, map_list[map_item].latlang.longitude])
+            .addTo(map)
+            .on('click', () => markerClick(map_list[map_item].public_id))
+        }
+
         L.control.layers(baseLayers).addTo(map);
         L.control.scale().addTo(map)
     })
