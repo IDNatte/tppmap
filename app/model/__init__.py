@@ -1,15 +1,20 @@
-from enum import unique
 from app.model.helper import random_id_generator
 from app.model.helper import passwordHash
 from app.shared import DB
+
 import datetime
 
 
 class User(DB.Model):
     __tablename__ = "User"
 
-    id = DB.Column(DB.String(255), primary_key=True,
-                   nullable=False, default=random_id_generator)
+    id = DB.Column(
+        DB.String(255),
+        primary_key=True,
+        nullable=False,
+        default=random_id_generator
+    )
+
     username = DB.Column(DB.String(200), nullable=False, unique=True)
     password = DB.Column(DB.String(255), nullable=False, unique=True)
     is_admin = DB.Column(DB.Boolean, nullable=False, default=False)
@@ -46,46 +51,34 @@ class User(DB.Model):
 class MapData(DB.Model):
     __tablename__ = "map_data"
 
-    id = DB.Column(DB.String(255), primary_key=True,
-                   nullable=False, default=random_id_generator)
+    id = DB.Column(
+        DB.String(255),
+        primary_key=True,
+        nullable=False,
+        default=random_id_generator
+    )
+
     latlang = DB.Column(DB.JSON, nullable=False)
     desc = DB.Column(DB.Text, nullable=True)
     address = DB.Column(DB.Text, nullable=False)
     isp_provider = DB.Column(DB.String(200), nullable=False)
     installation_date = DB.Column(DB.DateTime, default=datetime.datetime.now)
-    move_date = DB.Column(DB.DateTime)
-    damage_date = DB.Column(DB.DateTime)
-    is_repaired = DB.Column(DB.Boolean, default=False)
-    is_moved = DB.Column(DB.Boolean, default=False)
-    repair_report = DB.Column(DB.Text)
-    damage_report = DB.Column(DB.Text)
-    move_location = DB.Column(DB.Text)
+    report = DB.relationship(
+        'MapDataHistory',
+        backref='MapData',
+        cascade='all, delete-orphan',
+        order_by="desc(MapDataHistory.report_date)"
+    )
 
     def __init__(self,
                  latlang,
                  address,
                  isp_provider,
-                 desc,
-                 installation_date,
-                 move_date,
-                 damage_date,
-                 is_repaired,
-                 is_moved,
-                 repair_report,
-                 damage_report,
-                 move_location):
+                 desc):
         self.latlang = latlang
         self.address = address,
         self.isp_provider = isp_provider
         self.desc = desc
-        self.installation_date = installation_date
-        self.move_date = move_date
-        self.damage_date = damage_date
-        self.is_repaired = is_repaired
-        self.is_moved = is_moved
-        self.repair_report = repair_report
-        self.damage_report = damage_report
-        self.move_location = move_location
 
     def save(self):
         DB.session.add(self)
@@ -108,18 +101,43 @@ class MapData(DB.Model):
             'desc': self.desc,
             'address': self.address,
             'isp_provider': self.isp_provider,
-            'installation': self.installation_date,
-            'damage': {
-                'damageReport': self.damage_report,
-                'damageDate': self.damage_date,
-            },
-            'repair': {
-                'status': self.is_repaired,
-                'repairReport': self.repair_report,
-            },
-            'move': {
-                'status': self.is_moved,
-                'movedDate': self.move_date,
-                'location': self.move_location
-            }
+        }
+
+
+class MapDataHistory(DB.Model):
+    __tablename__ = "map_data_history"
+
+    id = DB.Column(
+        DB.String(255),
+        primary_key=True,
+        nullable=False,
+        default=random_id_generator
+    )
+
+    tower_id = DB.Column(
+        DB.String(255),
+        DB.ForeignKey('map_data.id')
+    )
+
+    report_date = DB.Column(DB.DateTime, nullable=False)
+    status = DB.Column(DB.String(150), default=False)
+    move_from = DB.Column(DB.JSON)
+    report_desc = DB.Column(DB.Text)
+
+    def __init__(self,
+                 report_date,
+                 status,
+                 report_desc,
+                 move_from):
+        self.status = status
+        self.report_date = report_date
+        self.report_desc = report_desc
+        self.move_from = move_from
+
+    def get(self):
+        return {
+            "status": self.status,
+            "report_date": self.report_date,
+            "report_desc": self.report_desc,
+            "move_from": self.move_from
         }

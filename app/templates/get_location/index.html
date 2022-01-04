@@ -1,0 +1,57 @@
+{% extends 'layout/plain-base.html' %}
+
+{% block title %}lokasi{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='home/css/leaflet.css')}}">
+{% endblock %}
+
+{% block inlineStyle %}
+<style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    #map {
+        height: 100vh;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content%}
+<div id="map"></div>
+{% endblock %}
+
+{% block jsScript %}
+<script src="{{ url_for('static', filename='home/js/leaflet.js')}}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let cities = L.layerGroup()
+        let coordinate = {{latlang|tojson}};
+        let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+
+        let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1 })
+        let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1 })
+        let satellite = L.tileLayer(tileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1 })
+
+        let map = L.map('map', {
+            zoom: 15,
+            layers: [grayscale, cities],
+            center: [coordinate.latitude, coordinate.longitude]
+        })
+
+        let baseLayers = {
+            "Streets": streets,
+            "Satellite": satellite,
+            "Grayscale": grayscale,
+        };
+
+        
+        L.marker([coordinate.latitude, coordinate.longitude]).addTo(map)
+        L.control.layers(baseLayers).addTo(map);
+        L.control.scale().addTo(map)
+    })
+</script>
+{% endblock %}

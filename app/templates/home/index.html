@@ -210,6 +210,7 @@
         };
 
         let map_list = {{map_list|tojson}};
+        console.log(map_list)
 
         for (let map_item in map_list) {
             L.marker([map_list[map_item].latlang.latitude, map_list[map_item].latlang.longitude])

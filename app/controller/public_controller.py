@@ -14,14 +14,19 @@ import sqlalchemy
 import json
 
 from app.model.helper import verifyPassword
+from app.model import MapDataHistory
 from app.model import MapData
 from app.model import User
+from app.shared import DB
 
 from app.helper import random_public_id
-
 from app.helper import login
 
+# debug
+import pprint
+
 public = Blueprint('public_controller', __name__)
+DEBUG_PRINT = pprint.PrettyPrinter(indent=2)
 
 
 @public.before_app_request
@@ -49,25 +54,27 @@ def logged_in_user():
 @login
 def public_index():
 
-    map_list = MapData.query.order_by(MapData.installation_date.desc()).all()
+    map_list = MapData.query.all()
     data_serializer = []
+
     for map_item in map_list:
+        detailed_tower_info = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(MapDataHistory.tower_id == map_item.id)\
+            .all()
+
         data_serializer.append({
             "public_id": random_public_id(),
             "latlang": json.loads(map_item.latlang),
             "desc": map_item.desc,
             "address": map_item.address,
             "isp_provider": map_item.isp_provider,
-            "installation_date": map_item.installation_date.isoformat(),
-            "move_date": map_item.move_date,
-            "damage_date": map_item.damage_date,
-            "is_repaired": map_item.is_repaired,
-            "is_moved": map_item.is_moved,
-            "repair_report": map_item.repair_report,
-            "damage_report": map_item.damage_report,
-            "move_location": map_item.move_location,
+            "installation_date": map_item.installation_date,
+            "report": sorted([info[1].get() for info in detailed_tower_info], key=lambda i: i["report_date"], reverse=True)
         })
-    print(data_serializer)
+
+    # print(data_serializer)
+
     return render_template('home/index.html', user=g.user.username, map_list=data_serializer)
 
 
@@ -233,29 +240,13 @@ def public_add():
 
             address = request.form.get('tower-address')
             isp_provider = request.form.get('tower-isp')
-            installation_date = datetime.datetime.now()
             desc = request.form.get('tower-desc')
-            is_repaired = False
-            is_moved = False
-            repair_report = None
-            damage_report = None
-            move_location = None
-            damage_date = None
-            move_date = None
 
             new_location = MapData(
                 latlang=latlang,
                 address=address,
                 isp_provider=isp_provider,
-                desc=desc,
-                installation_date=installation_date,
-                is_repaired=is_repaired,
-                is_moved=is_moved,
-                repair_report=repair_report,
-                damage_report=damage_report,
-                move_location=move_location,
-                move_date=move_date,
-                damage_date=damage_date
+                desc=desc
             )
 
             new_location.save()
@@ -278,3 +269,66 @@ def public_add():
 @login
 def public_help():
     return render_template('help/index.html')
+
+
+@public.route('/check-location')
+@login
+def public_check_location():
+    lat = request.args.get('lat', None)
+    lang = request.args.get('lng', None)
+
+    if (lat is not None and lang is not None):
+        latlang = {
+            "latitude": lat,
+            "longitude": lang
+        }
+        return render_template('get_location/index.html', latlang=latlang)
+    else:
+        flash('Lokasi tidak valid', 'error')
+        return redirect(url_for('public_controller.public_index'))
+
+
+@public.route('/debug')
+@login
+def public_debug():
+    debugData = MapData.query.get(
+        ",bgtYK'bmI{f[fdq3%fq]csXDeKG%44wxPK7SL,N_i^Ro@i:Up"
+    )
+
+    loremData = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, unde rem.\
+        Dignissimos id ducimus adipisci amet nulla possimus fugit rerum, illo vel distinctio\
+        sunt ratione a esse cum odio omnis quam voluptatem, incidunt dolores? Natus ducimus\
+        quod, consequuntur voluptatem quasi error, soluta possimus voluptate accusantium porro\
+        reprehenderit sequi rem sunt eos iusto sint quo voluptates nemo et, deserunt quae? Facere,\
+        distinctio sequi quisquam laborum corrupti expedita sint fugit laboriosam mollitia voluptates\
+        nulla voluptas modi accusantium repellat dignissimos ea, excepturi iusto unde veniam cupiditate.\
+        Distinctio perferendis tempora quibusdam doloremque labore accusantium velit, et laudantium. Porro\
+        ad a commodi cumque, quasi fugit maiores reiciendis inventore! Odit, fugiat saepe. Ad minus\
+        repellendus dolorum modi rerum quis quidem, ipsam vitae sint in necessitatibus excepturi, maxime\
+        totam iste sapiente commodi impedit unde aperiam hic, culpa non. Tempora deleniti tempore iste quam\
+        enim sint. Dolor accusantium, sunt atque nam praesentium, reiciendis pariatur culpa asperiores\
+        cupiditate ipsa animi porro beatae illum quae odit. Rerum autem fugit soluta quibusdam quam eos\
+        provident nam ea, saepe, corporis excepturi? Sequi praesentium tenetur recusandae fuga, dicta ipsa.\
+        Aliquam iure, porro sapiente, aspernatur voluptatibus animi nostrum, cumque sunt sint doloremque\
+        laborum hic totam. Beatae, maxime. Sunt obcaecati, quo eum nobis suscipit similique!"
+
+    debugData.report.append(
+        MapDataHistory(
+            report_date=datetime.datetime.now(),
+            status="perpindahan",
+            report_desc=loremData,
+            move_from=json.dumps({
+                "latitude": "-2.9348426",
+                "longitude": "115.1660467"
+            })
+        )
+        # MapDataHistory(
+        #     report_date=datetime.datetime.now(),
+        #     status="kerusakan",
+        #     report_desc=loremData,
+        #     move_location=None
+        # )
+    )
+
+    debugData.save()
+    return redirect(url_for('public_controller.public_index'))
