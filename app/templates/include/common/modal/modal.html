@@ -199,10 +199,37 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label for="exampleFormControlInput1" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
-        </div>
+        <form action="/add" method="post" class="container-fluid">
+          {% include 'include/form/_formcsrf.html' %}
+
+          <div class="row">            
+
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label class="my-1 me-2" for="tower-isp">Nama ISP</label>
+              <select name="tower-isp" class="form-select" id="tower-isp" required>
+                  {% for tower in tower_list %}
+                  <option selected value="xl">Koordinat ({{ tower.latlang.latitude }} {{ tower.latlang.longitude }}) {{ tower.address }}</option>
+                  {% endfor %}
+              </select>
+              <div id="tower-isp__help" class="form-text">Pilih salah satu isp yang tersedia</div>
+            </div>
+
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label for="tower-address" class="form-label">Alamat tower</label>
+              <textarea name="tower-address" class="form-control" id="tower-address" required></textarea>
+            </div>
+
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label for="tower-desc" class="form-label">Keterangan</label>
+              <textarea name="tower-desc" class="form-control" id="tower-desc"></textarea>
+            </div>
+
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="btn btn-primary mb-3" type="submit">Tambah</button>
+          </div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary">Accept</button>

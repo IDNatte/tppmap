@@ -55,7 +55,14 @@ def logged_in_user():
 def public_index():
 
     map_list = MapData.query.all()
+    tower_serializer = []
     data_serializer = []
+
+    for tower_item in map_list:
+        tower_serializer.append({
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
 
     for map_item in map_list:
         detailed_tower_info = DB.session.query(MapData, MapDataHistory)\
@@ -73,9 +80,14 @@ def public_index():
             "report": sorted([info[1].get() for info in detailed_tower_info], key=lambda i: i["report_date"], reverse=True)
         })
 
-    # print(data_serializer)
+    print(tower_serializer)
 
-    return render_template('home/index.html', user=g.user.username, map_list=data_serializer)
+    return render_template(
+        'home/index.html',
+        user=g.user.username,
+        map_list=data_serializer,
+        tower_list=tower_serializer
+    )
 
 
 @public.route('/register', methods=['GET', 'POST'])
@@ -292,7 +304,7 @@ def public_check_location():
 @login
 def public_debug():
     debugData = MapData.query.get(
-        ",bgtYK'bmI{f[fdq3%fq]csXDeKG%44wxPK7SL,N_i^Ro@i:Up"
+        "_6g)%CHMqyqI?{|#||n%sVA)C8TB;x6MIL1T1p\,J*PpsAwk'I"
     )
 
     loremData = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, unde rem.\
@@ -324,9 +336,9 @@ def public_debug():
         )
         # MapDataHistory(
         #     report_date=datetime.datetime.now(),
-        #     status="kerusakan",
+        #     status="perbaikan",
         #     report_desc=loremData,
-        #     move_location=None
+        #     move_from=None
         # )
     )
 
