@@ -60,6 +60,7 @@ def public_index():
 
     for tower_item in map_list:
         tower_serializer.append({
+            "id": tower_item.id,
             "latlang": json.loads(tower_item.latlang),
             "address": tower_item.address
         })
