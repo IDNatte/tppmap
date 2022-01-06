@@ -199,30 +199,30 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="/report" method="post" class="container-fluid">
+        <form action="/report-damage" method="post" class="container-fluid">
           {% include 'include/form/_formcsrf.html' %}
 
           <div class="row">            
 
             <div class="col-sm-12 col-md-12 mb-3">
-              <label class="my-1 me-2" for="tower-coord">Titik koordinat</label>
-              <select name="tower-coord" class="form-select" id="tower-coord" required>
+              <label class="my-1 me-2" for="tower-damage-coord">Titik koordinat</label>
+              <select name="tower-damage-coord" class="form-select" id="tower-damage-coord" required>
                 <option selected disabled>Pilih titik koordinat</option>                  
                 {% for tower in tower_list %}
-                <option value="tower#tower_id{{ tower.id }}">{{ tower.address|capitalize }}, Koordinat ({{ tower.latlang.latitude }}, {{ tower.latlang.longitude }})</option>
+                <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.address|capitalize }}, Koordinat ({{ tower.latlang.latitude }}, {{ tower.latlang.longitude }})</option>
                 {% endfor %}
               </select>
-              <div id="tower-coord__help" class="form-text">Pilih titik koordinat</div>
+              <div id="tower-damage-coord__help" class="form-text">Pilih titik koordinat</div>
             </div>
 
             <div class="col-sm-12 col-md-12 mb-3">
-              <label for="tower-desc" class="form-label">Tanggal laporan</label>
-              <input type="date" name="tower-desc" class="form-control" id="tower-desc">
+              <label for="tower-damage-date" class="form-label">Tanggal laporan</label>
+              <input type="date" name="tower-damage-date" class="form-control" id="tower-damage-date" required>
             </div>            
 
             <div class="col-sm-12 col-md-12 mb-3">
-              <label for="tower-address" class="form-label">Keterangan kerusakan</label>
-              <textarea name="tower-address" class="form-control" id="tower-address" required></textarea>
+              <label for="tower-damage-description" class="form-label">Keterangan kerusakan</label>
+              <textarea name="tower-damage-description" class="form-control" id="tower-damage-description" required></textarea>
             </div>
           </div>
 

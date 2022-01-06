@@ -17,6 +17,20 @@ def login(view):
     return wrapped_view
 
 
+def fragment_parser(fragment):
+    """
+    fragment parser for get tower id, and coordinate from report request
+    """
+    resolver = {
+        "id": fragment[6:57],
+        "coordinate": {
+            "latitude": fragment[57:].split('/')[0],
+            "longitude": fragment[57:].split('/')[1]
+        }
+    }
+    return resolver
+
+
 def random_public_id():
     """
     Public string randomizer

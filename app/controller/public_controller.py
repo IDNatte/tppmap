@@ -20,6 +20,7 @@ from app.model import User
 from app.shared import DB
 
 from app.helper import random_public_id
+from app.helper import fragment_parser
 from app.helper import login
 
 # debug
@@ -65,6 +66,8 @@ def public_index():
             "address": tower_item.address
         })
 
+        print(len(tower_item.id))
+
     for map_item in map_list:
         detailed_tower_info = DB.session.query(MapData, MapDataHistory)\
             .join(MapDataHistory)\
@@ -80,8 +83,6 @@ def public_index():
             "installation_date": map_item.installation_date,
             "report": sorted([info[1].get() for info in detailed_tower_info], key=lambda i: i["report_date"], reverse=True)
         })
-
-    print(tower_serializer)
 
     return render_template(
         'home/index.html',
@@ -276,6 +277,17 @@ def public_add():
             return render_template('home/index.html')
 
     return render_template('home/index.html')
+
+
+@public.route('/report-damage', methods=['GET', 'POST'])
+@login
+def public_report_damage():
+    if request.method == 'POST':
+        test = request.form.get('tower-damage-coord')
+        test2 = fragment_parser(test)
+        print(f'data-split = {test2}')
+
+    return redirect(url_for('public_controller.public_index'))
 
 
 @public.route('/help')
