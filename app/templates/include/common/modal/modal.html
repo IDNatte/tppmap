@@ -199,7 +199,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="/report-damage" method="post" class="container-fluid">
+        <form action="/report/damage" method="post" class="container-fluid">
           {% include 'include/form/_formcsrf.html' %}
 
           <div class="row">            
@@ -207,7 +207,7 @@
             <div class="col-sm-12 col-md-12 mb-3">
               <label class="my-1 me-2" for="tower-damage-coord">Titik koordinat</label>
               <select name="tower-damage-coord" class="form-select" id="tower-damage-coord" required>
-                <option selected disabled>Pilih titik koordinat</option>                  
+                <option selected disabled value="">Pilih titik koordinat</option>                  
                 {% for tower in tower_list %}
                 <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.address|capitalize }}, Koordinat ({{ tower.latlang.latitude }}, {{ tower.latlang.longitude }})</option>
                 {% endfor %}
@@ -217,8 +217,9 @@
 
             <div class="col-sm-12 col-md-12 mb-3">
               <label for="tower-damage-date" class="form-label">Tanggal laporan</label>
-              <input type="date" name="tower-damage-date" class="form-control" id="tower-damage-date" required>
-            </div>            
+              <input type="datetime-local" name="tower-damage-date" class="form-control" id="tower-damage-date" required>
+              <div id="tower-damage-date__help" class="form-text">masukkan waktu E.g (01/02/2022, 12:01 AM)</div>
+            </div>
 
             <div class="col-sm-12 col-md-12 mb-3">
               <label for="tower-damage-description" class="form-label">Keterangan kerusakan</label>
@@ -226,7 +227,7 @@
             </div>
           </div>
 
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end" data-bs-dismiss="modal">
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <button class="btn btn-primary mb-3" type="submit">Tambah</button>
           </div>
         </form>
@@ -246,14 +247,38 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label for="exampleFormControlInput1" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary">Accept</button>
-        <button type="button" class="btn btn-link text-gray-600 ms-auto" data-bs-dismiss="modal">Close</button>
+        <form action="/report/repr" method="post" class="container-fluid">
+          {% include 'include/form/_formcsrf.html' %}
+
+          <div class="row">            
+
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label class="my-1 me-2" for="tower-repair-coord">Titik koordinat</label>
+              <select name="tower-repair-coord" class="form-select" id="tower-repair-coord" required>
+                <option selected disabled value="">Pilih titik koordinat</option>                  
+                {% for tower in tower_list %}
+                <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.address|capitalize }}, Koordinat ({{ tower.latlang.latitude }}, {{ tower.latlang.longitude }})</option>
+                {% endfor %}
+              </select>
+              <div id="tower-repair-coord__help" class="form-text">Pilih titik koordinat</div>
+            </div>
+
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label for="tower-repair-date" class="form-label">Tanggal laporan</label>
+              <input type="datetime-local" name="tower-repair-date" class="form-control" id="tower-repair-date" required>
+              <div id="tower-repair-date__help" class="form-text">masukkan waktu E.g (01/02/2022, 12:01 AM)</div>
+            </div>
+
+            <div class="col-sm-12 col-md-12 mb-3">
+              <label for="tower-repair-description" class="form-label">Keterangan kerusakan</label>
+              <textarea name="tower-repair-description" class="form-control" id="tower-repair-description" required></textarea>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="btn btn-primary mb-3" type="submit">Tambah</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

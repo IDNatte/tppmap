@@ -8,6 +8,7 @@ from flask import url_for
 from flask import session
 from flask import request
 from flask import flash
+from flask import abort
 from flask import g
 
 import sqlalchemy
@@ -124,16 +125,16 @@ def public_register():
                             is_active=active, is_admin=admin)
                 user.save()
 
-                flash('user added', 'info')
+                flash('Akun ditambahkan', 'info')
                 return redirect(url_for('public_controller.public_login'))
 
             except (sqlalchemy.exc.IntegrityError):
                 user.rollback()
-                flash('user already registered !', 'error')
+                flash('Akun sudah terdaftar !', 'error')
                 return render_template('register/index.html')
 
         elif '' in validator:
-            flash('please fill all detail', 'error')
+            flash('Pastikan isikan semua informasi !', 'error')
             return render_template('register/index.html')
 
 
@@ -205,14 +206,14 @@ def public_login():
                             flash(f'welcome {username}', 'info')
                             return response
                     else:
-                        flash('Password wrong', 'error')
+                        flash('Password salah', 'error')
                 else:
-                    flash('User not registered', 'error')
+                    flash('Akun tidak terdaftar', 'error')
 
             else:
-                flash('No password provided !', 'error')
+                flash('Silahkan masukkan password !', 'error')
         else:
-            flash('No username provided !', 'error')
+            flash('Silahkan masukkan username !', 'error')
 
     elif request.method == 'GET':
         if g.user is not None:
@@ -273,19 +274,67 @@ def public_add():
 
         except (sqlalchemy.exc.SQLAlchemyError):
             new_location.rollback()
-            flash('maaf, terjadi gangguan pada server !', 'error')
+            flash('Maaf, terjadi gangguan pada server !', 'error')
             return render_template('home/index.html')
 
     return render_template('home/index.html')
 
 
-@public.route('/report-damage', methods=['GET', 'POST'])
+@public.route('/report/<string:report_type>', methods=['GET', 'POST'])
 @login
-def public_report_damage():
+def public_report_damage(report_type):
     if request.method == 'POST':
-        test = request.form.get('tower-damage-coord')
-        test2 = fragment_parser(test)
-        print(f'data-split = {test2}')
+        if report_type == 'damage':
+            report_date = request.form.get('tower-damage-date')
+            damage_report = request.form.get('tower-damage-description')
+            tower_id = fragment_parser(
+                request.form.get('tower-damage-coord')).get('id')
+
+            try:
+                tower = MapData.query.get(tower_id)
+                tower.report.append(
+                    MapDataHistory(
+                        report_date=report_date,
+                        report_desc=damage_report,
+                        status='kerusakan',
+                        move_from=None
+                    )
+                )
+                tower.save()
+                flash('Laporan sudah disimpan', 'success')
+
+            except (sqlalchemy.exc.SQLAlchemyError):
+                tower.rollback()
+                flash('Terjadi kesalahan saat menyimpan laporan', 'error')
+
+        elif report_type == 'repr':
+            report_date = request.form.get('tower-repair-date')
+            repair_report = request.form.get('tower-repair-description')
+            tower_id = fragment_parser(
+                request.form.get('tower-repair-coord')).get('id')
+
+            try:
+                tower = MapData.query.get(tower_id)
+                tower.report.append(
+                    MapDataHistory(
+                        report_date=report_date,
+                        report_desc=repair_report,
+                        status='perbaikan',
+                        move_from=None
+                    )
+                )
+                tower.save()
+                flash('Laporan sudah disimpan', 'success')
+
+            except (sqlalchemy.exc.SQLAlchemyError):
+                tower.rollback()
+                flash('Terjadi kesalahan saat menyimpan laporan', 'error')
+
+        elif report_type == 'mv':
+            pass
+
+        else:
+            abort(404)
 
     return redirect(url_for('public_controller.public_index'))
 
