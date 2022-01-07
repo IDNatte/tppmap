@@ -66,6 +66,9 @@
                                         {% include 'include/form/_formcsrf.html' %}
 
                                         <input type="text" name="move-tower-id" hidden value="{{tower.tower_id}}">
+                                        <input type="text" name="move-old-latitude" hidden value="{{tower.latlng.latitude}}">
+                                        <input type="text" name="move-old-longitude" hidden value="{{tower.latlng.longitude}}">
+
         
                                         <div class="col-sm-12 col-md-6 pb-3">
                                             <label for="latitude" class="form-label">Latitude</label>

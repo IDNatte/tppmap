@@ -83,6 +83,8 @@ def public_index():
             "report": sorted([info[1].get() for info in detailed_tower_info], key=lambda i: i["report_date"], reverse=True)
         })
 
+    # print(data_serializer)
+
     return render_template(
         'home/index.html',
         user=g.user.username,
@@ -310,16 +312,15 @@ def public_move_tower():
                 MapDataHistory(
                     report_date=datetime.datetime.now(),
                     status='perpindahan',
-                    move_from=tower.latlang,
+                    move_from=json.loads(tower.latlang),
                     report_desc=desc
-
                 )
             )
+            tower.address = new_address
             tower.latlang = json.dumps({
                 'latitude': new_latitude,
                 'longitude': new_longitude
             })
-            tower.address = new_address
 
             tower.save()
 

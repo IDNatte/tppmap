@@ -1,3 +1,4 @@
+import json
 from app.model.helper import random_id_generator
 from app.model.helper import passwordHash
 from app.shared import DB
@@ -97,7 +98,7 @@ class MapData(DB.Model):
     def get(self):
         return {
             'id': self.id,
-            'latlang': self.latlang,
+            'latlang': json.loads(self.latlang),
             'desc': self.desc,
             'address': self.address,
             'isp_provider': self.isp_provider,
