@@ -13,6 +13,11 @@
         height: 93.7vh;
         border-radius: 5px;
     }
+
+    #__map-pindah-modal {
+        height: 93.7vh;
+        /* width: 300px; */
+    }
 </style>
 {% endblock %}
 
@@ -180,6 +185,13 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
+        /** 
+         * 
+         * 
+         * Leaflet config on dashboard page
+         * 
+         * 
+        */
         function markerClick (modalTarget) {
             // console.log(modalTarget)
             let modalElement = document.getElementById(`tower-detail__${modalTarget}`)
@@ -220,6 +232,37 @@
 
         L.control.layers(baseLayers).addTo(map);
         L.control.scale().addTo(map)
+
+        /**
+         * 
+         * 
+         * Leaflet config on "pindah lokasi" modal event onClick.
+         * 
+         */
+        let modalCities = L.layerGroup()
+        let modalTileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+
+        let modalGrayscale = L.tileLayer(modalTileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1 })
+        let modalStreets = L.tileLayer(modalTileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1 })
+        let modalSatellite = L.tileLayer(modalTileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1 })
+
+        let modalMap = L.map('__map-pindah-modal', {
+            zoom: 11,
+            layers: [modalSatellite, modalCities],
+            center: [-2.928304, 115.1611323]
+        })
+
+        let modalBaseLayers = {
+            "Streets": modalStreets,
+            "Satellite": modalSatellite,
+            "Grayscale": modalGrayscale,
+        };
+
+
+        L.control.layers(modalBaseLayers).addTo(modalMap);
+        L.control.scale().addTo(modalMap)
+
+
     })
 </script>
 {% endblock %}

@@ -1,0 +1,228 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='home/css/style.css')}}">
+<link rel="stylesheet" href="{{ url_for('static', filename='home/css/leaflet.css')}}">
+{% endblock %}
+
+{% block inlineStyle %}
+<style>
+    #map {
+        height: 60vh;
+        border-radius: 5px;
+    }
+
+</style>
+{% endblock %}
+
+{% block content%}
+
+{% include 'include/home-partial/navbar.html' %}
+
+{% include 'include/home-partial/sidebar.html' %}
+
+<main class="content pb-5">
+    {% include 'include/home-partial/content-navbar.html' %}
+
+    <div class="pt-3">
+        <div class="row">
+            <!-- Tower Dipindah -->
+            <div class="col-sm-12 mb-4">
+                <div class="card border-0 shadow">
+                    <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+                        <div class="d-block mb-3 mb-sm-0">
+                            <!-- <div class="fs-5 fw-normal mb-2">TPP Map</div> -->
+                            <h2 class="fs-3 fw-extrabold">Cari lokasi pada koordinat</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-12 col-md-6">
+                                    <h4 class="mb-3">Detail lokasi tower sebelumnya</h4>
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6 pb-3">
+                                            <label for="latitude-old" class="form-label">Latitude</label>
+                                            <input type="text" class="form-control" id="latitude-old" value="{{tower.latlng.latitude}}" disabled>
+                                        </div>
+                                        
+                                        <div class="col-sm-12 col-md-6 pb-3">
+                                            <label for="longitude-old" class="form-label">Longitude</label>
+                                            <input type="text" class="form-control" id="longitude-old" value="{{tower.latlng.longitude}}" disabled>
+                                        </div>
+        
+                                        <div class="col-sm-12 mb-3">
+                                            <label for="address-old"  class="form-label">Alamat</label>
+                                            <textarea id="address-old" class="form-control" disabled>{{tower.address}}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div class="col-sm-12 col-md-6">
+                                    <h4 class="mb-3">Detail lokasi tower baru</h4>
+                                    <form class="row" action="{{url_for('public_controller.public_move_tower')}}" method="post">
+                                        {% include 'include/form/_formcsrf.html' %}
+
+                                        <input type="text" name="move-tower-id" hidden value="{{tower.tower_id}}">
+        
+                                        <div class="col-sm-12 col-md-6 pb-3">
+                                            <label for="latitude" class="form-label">Latitude</label>
+                                            <input type="text" name="tower-move-latitude" class="form-control latitude" id="latitude" required>
+                                        </div>
+                                        
+                                        <div class="col-sm-12 col-md-6 pb-3">
+                                            <label for="longitude" class="form-label">Longitude</label>
+                                            <input type="text" name="tower-move-longitude" class="form-control longitude" id="longitude" required>
+                                        </div>
+        
+                                        <div class="col-sm-12 col-md-6 mb-3">
+                                            <label for="address"  class="form-label">Alamat</label>
+                                            <textarea name="tower-move-address" id="address" class="form-control address"></textarea>
+                                        </div>
+
+                                        <div class="col-sm-12 col-md-6 mb-3">
+                                            <label for="description" class="form-label">Keterangan</label>
+                                            <textarea name="tower-move-desc" id="description" class="form-control"></textarea>
+                                        </div>
+        
+                                        <div class="d-grid gap-2 col-6 mx-auto">
+                                            <button class="btn btn-secondary" type="submit">Pindah lokasi</button>
+                                        </div>
+        
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Lokasi Tower -->
+            <div class="col-12 mb-4">
+                <div class="card bg- border-0 shadow">
+                    <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+                        <div class="d-block mb-3 mb-sm-0">
+                            <!-- <div class="fs-5 fw-normal mb-2">TPP Map</div> -->
+                            <h2 class="fs-3 fw-extrabold">Cari lokasi pada map</h2>
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+{% include 'include/common/modal/modal.html' %}
+
+{% endblock %}
+
+{% block jsScript %}
+<script src="{{ url_for('static', filename='home/js/leaflet.js')}}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        /**
+         * 
+         * 
+         * Leaflet config on "pindah lokasi" modal event onClick.
+         * 
+         */
+        let moveMarker
+        let moveCities = L.layerGroup()
+        let moveTileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+
+        let moveGrayscale = L.tileLayer(moveTileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1 })
+        let moveStreets = L.tileLayer(moveTileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1 })
+        let moveSatellite = L.tileLayer(moveTileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1 })
+
+        let moveMap = L.map('map', {
+            zoom: 15,
+            layers: [moveSatellite, moveCities],
+            center: [-2.928304, 115.1611323]
+        })
+
+        let moveBaseLayers = {
+            "Streets": moveStreets,
+            "Satellite": moveSatellite,
+            "Grayscale": moveGrayscale,
+        };
+
+        L.control.layers(moveBaseLayers).addTo(moveMap);
+        L.control.scale().addTo(moveMap)
+
+        moveMap.on('click', (e) => {
+            if (moveMarker) {
+                moveMap.removeLayer(moveMarker)
+            }
+            
+            moveMarker = new L.Marker(e.latlng, {draggable: true}).addTo(moveMap)
+            document.querySelector('.latitude').value = moveMarker.getLatLng().lat
+            document.querySelector('.longitude').value = moveMarker.getLatLng().lng
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${moveMarker.getLatLng().lat}&lon=${moveMarker.getLatLng().lng}&format=json`)
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.address').value = data.display_name
+                })
+
+            moveMarker.on('drag', (e) => {
+                document.querySelector('.latitude').value = moveMarker.getLatLng().lat
+                document.querySelector('.longitude').value = moveMarker.getLatLng().lng
+                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${moveMarker.getLatLng().lat}&lon=${moveMarker.getLatLng().lng}&format=json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.querySelector('.address').value = data.display_name
+                    })
+            })
+        })
+        
+        /**
+         * 
+         * 
+         * get data from manual input in lat lng box uptop map
+         * 
+         * 
+        */
+
+        let latitude = document.querySelector('.latitude')
+        let longitude = document.querySelector('.longitude')
+
+        longitude.addEventListener('keyup', (e) => {
+            if (e.keyCode === 13) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude.value}&lon=${longitude.value}&format=json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (moveMarker) {
+                            moveMap.removeLayer(moveMarker)
+                        }
+
+                        document.querySelector('.address').value = data.display_name
+                        moveMarker = new L.Marker([data.lat, data.lon], {draggable: true}).addTo(moveMap)
+                        moveMap.flyTo([latitude.value, longitude.value])
+                    })
+            }
+        })
+
+        latitude.addEventListener('keyup', (e) => {
+            if (e.keyCode === 13) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude.value}&lon=${longitude.value}&format=json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (moveMarker) {
+                            moveMap.removeLayer(moveMarker)
+                        }
+
+                        document.querySelector('.address').value = data.display_name
+                        moveMarker = new L.Marker([data.lat, data.lon], {draggable: true}).addTo(moveMap)
+                        moveMap.flyTo([latitude.value, longitude.value])
+                    })
+            }
+        })
+    })
+</script>
+{% endblock %}

@@ -21,14 +21,25 @@ def fragment_parser(fragment):
     """
     fragment parser for get tower id, and coordinate from report request
     """
-    resolver = {
-        "id": fragment[6:56],
-        "coordinate": {
-            "latitude": fragment[57:].split('/')[0],
-            "longitude": fragment[57:].split('/')[1]
+    try:
+        resolver = {
+            "id": fragment[6:56],
+            "coordinate": {
+                "latitude": fragment[57:].split('/')[0],
+                "longitude": fragment[57:].split('/')[1]
+            }
         }
-    }
-    return resolver
+        return resolver
+
+    except IndexError:
+        resolver = {
+            "id": fragment[6:56],
+            "coordinate": {
+                "latitude": None,
+                "longitude": None
+            }
+        }
+        return resolver
 
 
 def random_public_id():

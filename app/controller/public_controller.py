@@ -55,7 +55,6 @@ def logged_in_user():
 @public.route('/')
 @login
 def public_index():
-
     map_list = MapData.query.all()
     tower_serializer = []
     data_serializer = []
@@ -67,8 +66,6 @@ def public_index():
             "address": tower_item.address
         })
 
-        print(len(tower_item.id))
-
     for map_item in map_list:
         detailed_tower_info = DB.session.query(MapData, MapDataHistory)\
             .join(MapDataHistory)\
@@ -76,6 +73,7 @@ def public_index():
             .all()
 
         data_serializer.append({
+            "tower_id": f'tower${map_item.id}',
             "public_id": random_public_id(),
             "latlang": json.loads(map_item.latlang),
             "desc": map_item.desc,
@@ -280,6 +278,57 @@ def public_add():
     return render_template('home/index.html')
 
 
+@public.route('/move-tower', methods=['GET', 'POST'])
+@login
+def public_move_tower():
+    if request.method == 'GET':
+        id_fragment = str(request.args['tower_id'])
+        if id_fragment:
+            tower_id = fragment_parser(id_fragment).get('id')
+            tower = MapData.query.get(tower_id)
+            data_serializer = {
+                "latlng": json.loads(tower.latlang),
+                "address": tower.address,
+                "tower_id": tower_id
+            }
+            print(tower.address)
+            return render_template('move/index.html', tower=data_serializer)
+
+        else:
+            abort(403)
+
+    elif request.method == 'POST':
+        tower_id = request.form.get('move-tower-id')
+        new_address = request.form.get('tower-move-address')
+        new_latitude = request.form.get('tower-move-latitude')
+        new_longitude = request.form.get('tower-move-longitude')
+        desc = request.form.get('tower-move-desc')
+
+        try:
+            tower = MapData.query.get(tower_id)
+            tower.report.append(
+                MapDataHistory(
+                    report_date=datetime.datetime.now(),
+                    status='perpindahan',
+                    move_from=tower.latlang,
+                    report_desc=desc
+
+                )
+            )
+            tower.latlang = json.dumps({
+                'latitude': new_latitude,
+                'longitude': new_longitude
+            })
+            tower.address = new_address
+
+            tower.save()
+
+        except (sqlalchemy.exc.SQLAlchemyError) as Err:
+            print(Err)
+
+        return redirect(url_for('public_controller.public_index'))
+
+
 @public.route('/report/<string:report_type>', methods=['GET', 'POST'])
 @login
 def public_report_damage(report_type):
@@ -330,9 +379,6 @@ def public_report_damage(report_type):
                 tower.rollback()
                 flash('Terjadi kesalahan saat menyimpan laporan', 'error')
 
-        elif report_type == 'mv':
-            pass
-
         else:
             abort(404)
 
@@ -342,7 +388,16 @@ def public_report_damage(report_type):
 @public.route('/help')
 @login
 def public_help():
-    return render_template('help/index.html')
+    map_list = MapData.query.all()
+    tower_serializer = []
+
+    for tower_item in map_list:
+        tower_serializer.append({
+            "id": tower_item.id,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
+    return render_template('help/index.html', tower_list=tower_serializer)
 
 
 @public.route('/check-location')
