@@ -68,7 +68,7 @@
                                         <input type="text" name="move-tower-id" hidden value="{{tower.tower_id}}">
                                         <input type="text" name="move-old-latitude" hidden value="{{tower.latlng.latitude}}">
                                         <input type="text" name="move-old-longitude" hidden value="{{tower.latlng.longitude}}">
-
+                                        <input type="text" name="move-old-address" hidden value="{{tower.address}}">
         
                                         <div class="col-sm-12 col-md-6 pb-3">
                                             <label for="latitude" class="form-label">Latitude</label>
@@ -82,12 +82,12 @@
         
                                         <div class="col-sm-12 col-md-6 mb-3">
                                             <label for="address"  class="form-label">Alamat</label>
-                                            <textarea name="tower-move-address" id="address" class="form-control address"></textarea>
+                                            <textarea name="tower-move-address" id="address" class="form-control address" required></textarea>
                                         </div>
 
                                         <div class="col-sm-12 col-md-6 mb-3">
                                             <label for="description" class="form-label">Keterangan</label>
-                                            <textarea name="tower-move-desc" id="description" class="form-control"></textarea>
+                                            <textarea name="tower-move-desc" id="description" class="form-control" required></textarea>
                                         </div>
         
                                         <div class="d-grid gap-2 col-6 mx-auto">

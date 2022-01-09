@@ -122,23 +122,37 @@ class MapDataHistory(DB.Model):
 
     report_date = DB.Column(DB.DateTime, nullable=False)
     status = DB.Column(DB.String(150), default=False)
+    address_history = DB.Column(DB.Text)
     move_from = DB.Column(DB.JSON)
     report_desc = DB.Column(DB.Text)
 
     def __init__(self,
                  report_date,
                  status,
+                 address_history,
                  report_desc,
                  move_from):
         self.status = status
         self.report_date = report_date
         self.report_desc = report_desc
         self.move_from = move_from
+        self.address_history = address_history
 
     def get(self):
-        return {
-            "status": self.status,
-            "report_date": self.report_date,
-            "report_desc": self.report_desc,
-            "move_from": self.move_from
-        }
+        if self.move_from:
+            return {
+                "status": self.status,
+                "report_date": self.report_date,
+                "report_desc": self.report_desc,
+                "address_history": self.address_history,
+                "move_from": json.loads(self.move_from)
+            }
+
+        else:
+            return {
+                "status": self.status,
+                "report_date": self.report_date,
+                "address_history": None,
+                "report_desc": self.report_desc,
+                "move_from": None
+            }

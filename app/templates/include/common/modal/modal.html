@@ -51,7 +51,7 @@
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                           <a class="btn btn btn-warning me-md-2" href="{{url_for('public_controller.public_move_tower')}}?tower_id={{map_data.tower_id}}">Pindah lokasi tower</a>
-                          <a class="btn btn-danger" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#modal-penghapusan-tower">Hapus titik tower</a>
+                          <a class="btn btn-danger" href="{{url_for('public_controller.public_delete_tower', tower=map_data.tower_id)}}">Hapus titik tower</a>
                         </div>
 
                       </div>
@@ -75,6 +75,7 @@
                                 <div class="__generated-report">
                                   <h3 class="pb-2">Laporan {{ status.status|capitalize }}</h3>
                                   <p>{{ status.report_desc }}</p>
+                                  <p>Dipindahkan ke alamat <strong>{{map_data.address}}</strong> dari <strong>{{status.address_history}}</strong></p>
                                   {% if status.status == 'perpindahan' %}
                                   <a class="btn btn-secondary" target="_blank" href="{{url_for('public_controller.public_check_location')}}?lat={{status.move_from.latitude}}&lng={{status.move_from.longitude}}">Lihat posisi awal</a>
                                   {% endif %}

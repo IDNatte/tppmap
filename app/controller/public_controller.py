@@ -280,6 +280,22 @@ def public_add():
     return render_template('home/index.html')
 
 
+@public.route('/delete/<string:tower>', methods=['GET'])
+@login
+def public_delete_tower(tower):
+    try:
+        parsed_id = fragment_parser(tower).get('id')
+        remove_tower = MapData.query.get(parsed_id)
+        DB.session.delete(remove_tower)
+        DB.session.commit()
+        flash('Titik tower dihapus !', 'info')
+
+    except (sqlalchemy.exc.SQLAlchemyError):
+        flash('Terjadi kesalahan saat menghapus titik tower', 'error')
+        DB.session.rollback()
+    return redirect(url_for('public_controller.public_index'))
+
+
 @public.route('/move-tower', methods=['GET', 'POST'])
 @login
 def public_move_tower():
@@ -312,7 +328,8 @@ def public_move_tower():
                 MapDataHistory(
                     report_date=datetime.datetime.now(),
                     status='perpindahan',
-                    move_from=json.loads(tower.latlang),
+                    move_from=tower.latlang,
+                    address_history=tower.address,
                     report_desc=desc
                 )
             )
@@ -346,6 +363,7 @@ def public_report_damage(report_type):
                     MapDataHistory(
                         report_date=report_date,
                         report_desc=damage_report,
+                        address_history=None,
                         status='kerusakan',
                         move_from=None
                     )
@@ -369,6 +387,7 @@ def public_report_damage(report_type):
                     MapDataHistory(
                         report_date=report_date,
                         report_desc=repair_report,
+                        address_history=None,
                         status='perbaikan',
                         move_from=None
                     )
