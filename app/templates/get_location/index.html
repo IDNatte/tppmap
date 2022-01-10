@@ -32,9 +32,9 @@
         let coordinate = {{latlang|tojson}};
         let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
 
-        let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1 })
-        let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1 })
-        let satellite = L.tileLayer(tileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1 })
+        let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'})
+        let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'})
+        let satellite = L.tileLayer(tileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'})
 
         let map = L.map('map', {
             zoom: 15,
