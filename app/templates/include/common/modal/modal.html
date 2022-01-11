@@ -21,6 +21,7 @@
                               <tr>
                                 <th scope="col">Lokasi koordinat (lat, lang)</th>
                                 <th scope="col">Alamat</th>
+                                <th scope="col">ISP Provider</th>
                                 <th scope="col">Tanggal instalasi</th>
                               </tr>
                             </thead>
@@ -28,6 +29,7 @@
                               <tr>
                                 <td>{{ map_data.latlang.latitude }}, {{ map_data.latlang.longitude }}</td>
                                 <td>{{ map_data.address}}</td>
+                                <td>{{ map_data.isp_provider}}</td>
                                 <td>{{ map_data.installation_date.strftime('%A, %d %B %Y') }}</td>  
                             </tbody>
                           </table>
@@ -67,7 +69,7 @@
                           <div class="accordion-item">
                             <h2 class="accordion-header" id="__accordion-status-heading-{{ map_data.public_id }}-{{ loop.index }}">
                               <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#__accordion-status-collapse-{{ map_data.public_id }}-{{ loop.index }}" aria-expanded="true" aria-controls="__accordion-status-collapse-{{ map_data.public_id }}-{{ loop.index }}">
-                                <span>{{ status.status|capitalize }} pada pukul {{ status.report_date.strftime("%X %p") }}, hari {{ status.report_date.strftime("%A") }}, {{ status.report_date.strftime("%d/%m/%Y") }}</span>
+                                <span>{{ status.status|capitalize }} pada {{ status.report_date.strftime("%A") }}, {{ status.report_date.strftime("%d/%m/%Y") }}</span>
                               </button>
                             </h2>
                             <div id="__accordion-status-collapse-{{ map_data.public_id }}-{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="__accordion-status-heading-{{ map_data.public_id }}-{{ loop.index }}" data-bs-parent="#__accordion-status-{{ map_data.public_id }}">
@@ -75,12 +77,12 @@
                                 <div class="__generated-report">
                                   <h3 class="pb-2">Laporan {{ status.status|capitalize }}</h3>
                                   <p>{{ status.report_desc }}</p>
-                                  <p>Dipindahkan ke alamat <strong>{{map_data.address}}</strong> dari <strong>{{status.address_history}}</strong></p>
                                   {% if status.status == 'perpindahan' %}
+                                  <p>Dipindahkan ke alamat <strong>{{map_data.address}}</strong> dari <strong>{{status.address_history}}</strong></p>
                                   <a class="btn btn-secondary" target="_blank" href="{{url_for('public_controller.public_check_location')}}?lat={{status.move_from.latitude}}&lng={{status.move_from.longitude}}">Lihat posisi awal</a>
                                   {% endif %}
                                   <div class="text-end">
-                                    <span class="text-muted fw-bold" style="font-size: small;">waktu {{ status.report_date.strftime("%X %p") }}, Tanggal {{ status.report_date.strftime("%d %B %Y") }}</span>
+                                    <span class="text-muted fw-bold" style="font-size: small;">Tanggal {{ status.report_date.strftime("%d %B %Y") }}</span>
                                   </div>
                                 </div>
                               </div>
@@ -117,20 +119,18 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="/add" method="post" class="container-fluid">
+        <form action="/add" method="post" class="container-fluid" name="__injectable-form">
           {% include 'include/form/_formcsrf.html' %}
 
           <div class="row">
             <div class="col-sm-12 col-md-6 mb-3">
               <label for="tower-latitude" class="form-label">Latitude</label>
               <input type="text" name="tower-latitude" class="form-control" id="tower-latitude" placeholder="latitude tower Eg. -2.933880" required>
-              <div id="tower-latitude__help" class="form-text"><a href="{{ url_for('public_controller.public_help')}}" target="_blank">Bantuan</a></div>
             </div>
 
             <div class="col-sm-12 col-md-6 mb-3">
               <label for="tower-longitude" class="form-label">Longitude</label>
               <input type="text" name="tower-longitude" class="form-control" id="tower-longitude" placeholder="longitude tower Eg. 115.1611323" required>
-              <div id="tower-longitude__help" class="form-text"><a href="{{ url_for('public_controller.public_help')}}" target="_blank">Bantuan</a></div>
             </div>
             
 
@@ -144,24 +144,6 @@
               <div id="tower-isp__help" class="form-text">Pilih salah satu isp yang tersedia</div>
             </div>
 
-            <!-- <div class="col-sm-12 col-md-6 mb-3">
-              <label class="my-1 me-2" for="tower-repairment_status">Status Perbaikan</label>
-              <select name="tower-repairement__status" class="form-select" id="tower-repairment_status">
-                  <option selected disabled>Pilih status perbaikan</option>
-                  <option value="tidak-perbaikan">Tidak dalam perbaikan</option>
-                  <option value="perbaikan">Dalam Perbaikan</option>
-              </select>
-            </div> -->
-
-            <!-- <div class="col-sm-12 col-md-12 mb-3">
-              <label class="my-1 me-2" for="tower-move_status">Status Pemindahan</label>
-              <select name="tower-moved__status" class="form-select" id="tower-move_status">
-                  <option selected disabled>Pilih status pemindahan</option>
-                  <option value="baru">Pemasangan awal</option>
-                  <option value="dipindahkan">Dipindahkan</option>
-              </select>
-            </div> -->
-
             <div class="col-sm-12 col-md-12 mb-3">
               <label for="tower-address" class="form-label">Alamat tower</label>
               <textarea name="tower-address" class="form-control" id="tower-address" required></textarea>
@@ -171,20 +153,6 @@
               <label for="tower-desc" class="form-label">Keterangan</label>
               <textarea name="tower-desc" class="form-control" id="tower-desc"></textarea>
             </div>
-
-            <!-- <div style="border-bottom: 1px solid #e5e7eb; margin-top: 1.5rem; margin-bottom: 2rem;"></div> -->
-          
-            <!-- <div class="col-sm-12 col-md-6 mb-3">
-              <label for="tower-moved_description" class="form-label">Keterangan pemindahan</label>
-              <textarea name="tower-moved__desc" class="form-control" id="tower-moved_description"></textarea>
-              <div id="tower-moved_description__help" class="form-text">Biarkan kosong jika anda memilih "status pemindahan awal"</div>
-            </div>
-
-            <div class="col-sm-12 col-md-6 mb-3">
-              <label for="tower-damage_description" class="form-label">Keterangan kerusakan</label>
-              <textarea name="tower-damage__desc" class="form-control" id="tower-damage_description"></textarea>
-              <div id="tower-damage_description__help" class="form-text">Biarkan kosong jika anda memilih status perbaikan "Tidak dalam perbaikan"</div>
-            </div> -->
 
           </div>
 
@@ -226,8 +194,8 @@
 
             <div class="col-sm-12 col-md-12 mb-3">
               <label for="tower-damage-date" class="form-label">Tanggal laporan</label>
-              <input type="datetime-local" name="tower-damage-date" class="form-control" id="tower-damage-date" required>
-              <div id="tower-damage-date__help" class="form-text">masukkan waktu E.g (01/02/2022, 12:01 AM)</div>
+              <input type="date" name="tower-damage-date" class="form-control" id="tower-damage-date" required>
+              <div id="tower-damage-date__help" class="form-text">masukkan waktu E.g</div>
             </div>
 
             <div class="col-sm-12 col-md-12 mb-3">
@@ -274,7 +242,7 @@
 
             <div class="col-sm-12 col-md-12 mb-3">
               <label for="tower-repair-date" class="form-label">Tanggal laporan</label>
-              <input type="datetime-local" name="tower-repair-date" class="form-control" id="tower-repair-date" required>
+              <input type="date" name="tower-repair-date" class="form-control" id="tower-repair-date" required>
               <div id="tower-repair-date__help" class="form-text">masukkan waktu E.g (01/02/2022, 12:01 AM)</div>
             </div>
 

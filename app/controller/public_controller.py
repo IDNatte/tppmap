@@ -7,6 +7,7 @@ from flask import redirect
 from flask import url_for
 from flask import session
 from flask import request
+from flask import jsonify
 from flask import flash
 from flask import abort
 from flask import g
@@ -358,7 +359,7 @@ def public_report_damage(report_type):
                 request.form.get('tower-damage-coord')).get('id')
 
             try:
-                tower = MapData.query.get(tower_id)
+                tower = MapData.query.get(tower_id).filter()
                 tower.report.append(
                     MapDataHistory(
                         report_date=report_date,
@@ -405,19 +406,72 @@ def public_report_damage(report_type):
     return redirect(url_for('public_controller.public_index'))
 
 
-@public.route('/help')
+@public.route('/recap', methods=['GET', 'POST'])
 @login
-def public_help():
-    map_list = MapData.query.all()
-    tower_serializer = []
+def public_data_recap():
+    if request.method == 'GET':
+        recap_type = request.args.get('type', None)
+        map_list = MapData.query.all()
+        tower_serializer = []
+        for tower_item in map_list:
+            tower_serializer.append({
+                "id": tower_item.id,
+                "latlang": json.loads(tower_item.latlang),
+                "address": tower_item.address
+            })
 
-    for tower_item in map_list:
-        tower_serializer.append({
-            "id": tower_item.id,
-            "latlang": json.loads(tower_item.latlang),
-            "address": tower_item.address
+        if recap_type == 'error':
+            return render_template(
+                'recap/index.html',
+                page_title="Rekap kerusakan",
+                subtitle='Rekap daftar tower yang mengalami kerusakan',
+                tower_list=tower_serializer
+            )
+
+        elif recap_type == 'repairement':
+            return render_template(
+                'recap/index.html',
+                page_title="Rekap perbaikan",
+                subtitle='Rekap daftar tower dalam perbaikan',
+                tower_list=tower_serializer
+            )
+
+        elif recap_type == 'movement':
+            return render_template(
+                'recap/index.html',
+                page_title="Rekap perpindahan",
+                subtitle='Rekap daftar tower dipindahkan',
+                tower_list=tower_serializer
+            )
+
+        elif recap_type == 'map-dl':
+            return render_template(
+                'recap/index.html',
+                page_title="Download map",
+                subtitle='Download map',
+                tower_list=tower_serializer
+            )
+
+        elif recap_type == 'all':
+            return render_template(
+                'recap/index.html',
+                page_title="Rekap keseluruhan",
+                subtitle='Rekap data seluruh tower',
+                tower_list=tower_serializer
+            )
+
+        else:
+            return redirect(url_for('public_controller.public_index'))
+
+    elif request.method == 'POST':
+        test = request.get_json()
+        print(test.get('endDate', None))
+        return jsonify({
+            "test": "result"
         })
-    return render_template('help/index.html', tower_list=tower_serializer)
+
+    else:
+        return redirect(url_for('public_controller.public_index'))
 
 
 @public.route('/check-location')
