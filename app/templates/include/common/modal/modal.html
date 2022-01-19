@@ -19,6 +19,7 @@
                           <table class="table table-borderless text-center">
                             <thead>
                               <tr>
+                                <th scope="col">Nama Tower</th>
                                 <th scope="col">Lokasi koordinat (lat, lang)</th>
                                 <th scope="col">Alamat</th>
                                 <th scope="col">ISP Provider</th>
@@ -27,6 +28,7 @@
                             </thead>
                             <tbody>
                               <tr>
+                                <td>{{ map_data.tower_name }}</td>
                                 <td>{{ map_data.latlang.latitude }}, {{ map_data.latlang.longitude }}</td>
                                 <td>{{ map_data.address}}</td>
                                 <td>{{ map_data.isp_provider}}</td>
@@ -49,11 +51,6 @@
                               </div>
                             </div>
                           </div>
-                        </div>
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                          <a class="btn btn btn-warning me-md-2" href="{{url_for('public_controller.public_move_tower')}}?tower_id={{map_data.tower_id}}">Pindah lokasi tower</a>
-                          <a class="btn btn-danger" href="{{url_for('public_controller.public_delete_tower', tower=map_data.tower_id)}}">Hapus titik tower</a>
                         </div>
 
                       </div>
@@ -109,36 +106,27 @@
 {% endfor %}
 <!-- Generate modal based on public id from map list -->
 
-<!-- Tambah Tower -->
-<div class="modal fade" id="modal-add__tower" tabindex="-1" role="dialog" aria-labelledby="modal-add__tower"
+<!-- Tambah tower v2 -->
+<div class="modal fade" id="modal-add__tower-test" tabindex="-1" role="dialog" aria-labelledby="modal-add__tower-test"
   aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h2 class="h6 modal-title">Tambah lokasi tower</h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="/add" method="post" class="container-fluid" name="__injectable-form">
+        <form action="/add" method="post" class="container-fluid __resetable">
           {% include 'include/form/_formcsrf.html' %}
 
           <div class="row">
-            <div class="col-sm-12 col-md-6 mb-3">
-              <label for="tower-latitude" class="form-label">Latitude</label>
-              <input type="text" name="tower-latitude" class="form-control" id="tower-latitude" placeholder="latitude tower Eg. -2.933880" required>
-            </div>
 
             <div class="col-sm-12 col-md-6 mb-3">
-              <label for="tower-longitude" class="form-label">Longitude</label>
-              <input type="text" name="tower-longitude" class="form-control" id="tower-longitude" placeholder="longitude tower Eg. 115.1611323" required>
-            </div>
-
-            <div class="col-sm-12 mb-3">
               <label for="tower-name" class="form-label">Nama Tower</label>
               <input type="text" name="tower-name" class="form-control" id="tower-name" placeholder="Nama Tower" required>
             </div>
             
-            <div class="col-sm-12 col-md-12 mb-3">
+            <div class="col-sm-12 col-md-6 mb-3">
               <label class="my-1 me-2" for="tower-isp">Nama ISP</label>
               <select name="tower-isp" class="form-select" id="tower-isp" required>
                   <option selected value="xl">Xl Axiata</option>
@@ -148,16 +136,44 @@
               <div id="tower-isp__help" class="form-text">Pilih salah satu isp yang tersedia</div>
             </div>
 
-            <div class="col-sm-12 col-md-12 mb-3">
+            <div class="col-sm-12 col-md-6 mb-3">
+              <label for="tower-latitude" class="form-label">Latitude</label>
+              <input type="text" class="form-control ui-latitude" id="tower-latitude" placeholder="latitude tower Eg. -2.933880" disabled required>
+              <input type="text" name="tower-latitude" class="form-control latitude" hidden>
+            </div>
+
+            <div class="col-sm-12 col-md-6 mb-3">
+              <label for="tower-longitude" class="form-label">Longitude</label>
+              <input type="text" class="form-control ui-longitude" id="tower-longitude" placeholder="longitude tower Eg. 115.1611323" disabled required>
+              <input type="text" name="tower-longitude" class="form-control longitude" hidden>
+            </div>
+
+            <div class="col-sm-12 col-md-6 mb-3">
               <label for="tower-address" class="form-label">Alamat tower</label>
-              <textarea name="tower-address" class="form-control" id="tower-address" required></textarea>
+              <textarea class="form-control ui-address" id="tower-address" disabled></textarea>
+              <textarea name="tower-address" class="form-control address" id="tower-address" hidden></textarea>
             </div>
 
-            <div class="col-sm-12 col-md-12 mb-3">
+            <div class="col-sm-12 col-md-6 mb-3">
               <label for="tower-desc" class="form-label">Keterangan</label>
-              <textarea name="tower-desc" class="form-control" id="tower-desc"></textarea>
+              <textarea name="tower-desc" class="form-control" id="tower-desc" required></textarea>
             </div>
 
+            <div class="col-sm-12 mb-3">
+              <div class="card">
+                <div class="card-header">
+                  <h1 class="fs-3 fw-extrabold">Posisi tower</h1>
+                  <div class="info">
+                    <svg class="icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                    <span class="fs-6 fw-bold mb-2" style="color: #6c757d !important">klik pada map jika ingin mencari koordinat posisi</span>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div style="height: 40vh;" class="modal-map rounded-1"></div>
+                </div>
+              </div>
+            </div>
+          
           </div>
 
           <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -168,7 +184,7 @@
     </div>
   </div>
 </div>
-<!-- Tambah Tower -->
+<!-- Tambah tower v2 -->
 
 <!-- Laporan kerusakan -->
 <div class="modal fade" id="modal-report-kerusakan" tabindex="-1" role="dialog" aria-labelledby="modal-default"

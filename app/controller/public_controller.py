@@ -237,6 +237,7 @@ def public_index():
 
         data_serializer.append({
             "tower_id": f'tower${map_item.id}',
+            "tower_name": map_item.tower_name,
             "public_id": random_public_id(),
             "latlang": json.loads(map_item.latlang),
             "desc": map_item.desc,
@@ -247,7 +248,7 @@ def public_index():
             "report": sorted([info[1].get() for info in detailed_tower_info], key=lambda i: i["report_date"], reverse=True)
         })
 
-    print(data_serializer)
+    # print(data_serializer)
 
     return render_template(
         'home/index.html',
@@ -260,10 +261,26 @@ def public_index():
 @public.route('/tower_list')
 @login
 def public_towerlist():
-    map_list = MapData.query.filter(MapData.is_used == True).all()
+    page = request.args.get('page', 1, type=int)
+    map_data = MapData.query.filter(MapData.is_used == True)\
+        .paginate(page=page, per_page=10)
+
+    data_serializers = []
+
+    for map_item in map_data.items:
+        data_serializers.append({
+            "tower_id": f'tower${map_item.id}',
+            "tower_name": map_item.tower_name,
+            "latlang": json.loads(map_item.latlang),
+            "address": map_item.address,
+            "isp_provider": map_item.isp_provider,
+            "installation_date": map_item.installation_date,
+        })
+
     return render_template(
         'tower_list/index.html',
-        map_list=map_list
+        map_list=data_serializers,
+        pagination=map_data,
     )
 
 
@@ -292,18 +309,18 @@ def public_add():
 
             new_location.save()
             flash('lokasi tersimpan', 'success')
-            return redirect(url_for('public_controller.public_index'))
+            return redirect(url_for('public_controller.public_towerlist'))
 
         except ValueError:
             flash('Maaf penulisan koordinat lokasi salah', 'error')
-            return render_template('home/index.html')
+            return redirect(url_for('public_controller.public_towerlist'))
 
         except (sqlalchemy.exc.SQLAlchemyError):
             new_location.rollback()
             flash('Maaf, terjadi gangguan pada server !', 'error')
-            return render_template('home/index.html')
+            return redirect(url_for('public_controller.public_towerlist'))
 
-    return render_template('home/index.html')
+    return redirect(url_for('public_controller.public_towerlist'))
 
 
 @public.route('/delete/<string:tower>', methods=['GET'])
@@ -319,7 +336,7 @@ def public_delete_tower(tower):
     except (sqlalchemy.exc.SQLAlchemyError):
         flash('Terjadi kesalahan saat menghapus titik tower', 'error')
         DB.session.rollback()
-    return redirect(url_for('public_controller.public_index'))
+    return redirect(url_for('public_controller.public_towerlist'))
 
 
 @public.route('/move-tower', methods=['GET', 'POST'])

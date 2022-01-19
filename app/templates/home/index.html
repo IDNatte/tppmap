@@ -201,21 +201,13 @@
          * 
         */
         function markerClick (modalTarget) {
-            // console.log(modalTarget)
             let modalElement = document.getElementById(`tower-detail__${modalTarget}`)
             let modal = bootstrap.Modal.getOrCreateInstance(modalElement)
-            // console.log(modal)
 
             modal.show()
-            // console.log(`.tower-detail__${modalTarget}`)
-        }
-
-        async function test() {
-            console.log(test)
         }
 
         async function addLocationModalOpen(latlng) {
-            // console.log(latlng)
             let geoloc = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`)
 
             if (geoloc.status === 200) {
@@ -255,30 +247,6 @@
 
         L.control.layers(baseLayers).addTo(map);
         L.control.scale().addTo(map)
-
-        /**
-         * 
-         * 
-         * add location @ click on the map
-         * 
-         * 
-        */
-
-        map.on('click', (e) => {
-            let latlng = e.latlng
-            let modalElement = document.getElementById('modal-add__tower')
-            let modal = bootstrap.Modal.getOrCreateInstance(modalElement)
-
-            modal.show()
-            modalElement.addEventListener('shown.bs.modal', (e) => {
-                addLocationModalOpen(latlng)
-            })
-
-            // clean up modal
-            modalElement.addEventListener('hidden.bs.modal', () => {
-                document.forms['__injectable-form'].reset()
-            })
-        })
 
     })
 </script>
