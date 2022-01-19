@@ -1,4 +1,5 @@
 import datetime
+from os import remove
 from flask import render_template
 from flask import make_response
 from flask import current_app
@@ -32,6 +33,8 @@ public = Blueprint('public_controller', __name__)
 DEBUG_PRINT = pprint.PrettyPrinter(indent=2)
 
 
+# cookie and session fetch/set operation ---------->
+
 @public.before_app_request
 def logged_in_user():
     if request.cookies.get('_remember') == 'remember':
@@ -52,47 +55,10 @@ def logged_in_user():
         g.user = None
         g.remember = request.cookies.get('_remember')
 
+# cookie and session fetch/set operation ---------->
 
-@public.route('/')
-@login
-def public_index():
-    map_list = MapData.query.all()
-    tower_serializer = []
-    data_serializer = []
 
-    for tower_item in map_list:
-        tower_serializer.append({
-            "id": tower_item.id,
-            "latlang": json.loads(tower_item.latlang),
-            "address": tower_item.address
-        })
-
-    for map_item in map_list:
-        detailed_tower_info = DB.session.query(MapData, MapDataHistory)\
-            .join(MapDataHistory)\
-            .filter(MapDataHistory.tower_id == map_item.id)\
-            .all()
-
-        data_serializer.append({
-            "tower_id": f'tower${map_item.id}',
-            "public_id": random_public_id(),
-            "latlang": json.loads(map_item.latlang),
-            "desc": map_item.desc,
-            "address": map_item.address,
-            "isp_provider": map_item.isp_provider,
-            "installation_date": map_item.installation_date,
-            "report": sorted([info[1].get() for info in detailed_tower_info], key=lambda i: i["report_date"], reverse=True)
-        })
-
-    # print(data_serializer)
-
-    return render_template(
-        'home/index.html',
-        user=g.user.username,
-        map_list=data_serializer,
-        tower_list=tower_serializer
-    )
-
+# User login operation ---------->
 
 @public.route('/register', methods=['GET', 'POST'])
 def public_register():
@@ -244,6 +210,63 @@ def public_logout():
         return redirect(url_for('public_controller.public_login'))
 
 
+# User login operation ---------->
+
+
+# CRUD operation ---------->
+
+@public.route('/')
+@login
+def public_index():
+    map_list = MapData.query.filter(MapData.is_used == True).all()
+    tower_serializer = []
+    data_serializer = []
+
+    for tower_item in map_list:
+        tower_serializer.append({
+            "id": tower_item.id,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
+
+    for map_item in map_list:
+        detailed_tower_info = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(MapDataHistory.tower_id == map_item.id)\
+            .all()
+
+        data_serializer.append({
+            "tower_id": f'tower${map_item.id}',
+            "public_id": random_public_id(),
+            "latlang": json.loads(map_item.latlang),
+            "desc": map_item.desc,
+            "address": map_item.address,
+            "isp_provider": map_item.isp_provider,
+            "installation_date": map_item.installation_date,
+            "is_used": map_item.is_used,
+            "report": sorted([info[1].get() for info in detailed_tower_info], key=lambda i: i["report_date"], reverse=True)
+        })
+
+    print(data_serializer)
+
+    return render_template(
+        'home/index.html',
+        user=g.user.username,
+        map_list=data_serializer,
+        tower_list=tower_serializer
+    )
+
+
+@public.route('/tower_list')
+@login
+def public_towerlist():
+    map_list = MapData.query.filter(MapData.is_used == True).all()
+    return render_template(
+        'tower_list/index.html',
+        map_list=map_list
+    )
+
+
 @public.route('/add', methods=['GET', 'POST'])
 @login
 def public_add():
@@ -254,11 +277,13 @@ def public_add():
                 "longitude": float(request.form.get('tower-longitude'))
             })
 
+            tower_name = request.form.get('tower-name')
             address = request.form.get('tower-address')
             isp_provider = request.form.get('tower-isp')
             desc = request.form.get('tower-desc')
 
             new_location = MapData(
+                tower_name=tower_name,
                 latlang=latlang,
                 address=address,
                 isp_provider=isp_provider,
@@ -287,8 +312,8 @@ def public_delete_tower(tower):
     try:
         parsed_id = fragment_parser(tower).get('id')
         remove_tower = MapData.query.get(parsed_id)
-        DB.session.delete(remove_tower)
-        DB.session.commit()
+        remove_tower.is_used = False
+        remove_tower.save()
         flash('Titik tower dihapus !', 'info')
 
     except (sqlalchemy.exc.SQLAlchemyError):
@@ -359,7 +384,7 @@ def public_report_damage(report_type):
                 request.form.get('tower-damage-coord')).get('id')
 
             try:
-                tower = MapData.query.get(tower_id).filter()
+                tower = MapData.query.get(tower_id)
                 tower.report.append(
                     MapDataHistory(
                         report_date=report_date,
@@ -491,6 +516,12 @@ def public_check_location():
         return redirect(url_for('public_controller.public_index'))
 
 
+# CRUD operation ---------->
+
+
+# Debug operation ---------->
+
+
 @public.route('/debug')
 @login
 def public_debug():
@@ -535,3 +566,6 @@ def public_debug():
 
     debugData.save()
     return redirect(url_for('public_controller.public_index'))
+
+
+# Debug operation ---------->

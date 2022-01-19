@@ -59,11 +59,13 @@ class MapData(DB.Model):
         default=random_id_generator
     )
 
+    tower_name = DB.Column(DB.String(200), nullable=False)
     latlang = DB.Column(DB.JSON, nullable=False)
     desc = DB.Column(DB.Text, nullable=True)
     address = DB.Column(DB.Text, nullable=False)
     isp_provider = DB.Column(DB.String(200), nullable=False)
     installation_date = DB.Column(DB.DateTime, default=datetime.datetime.now)
+    is_used = DB.Column(DB.Boolean, default=True)
     report = DB.relationship(
         'MapDataHistory',
         backref='MapData',
@@ -73,6 +75,7 @@ class MapData(DB.Model):
 
     def __init__(self,
                  latlang,
+                 tower_name,
                  address,
                  isp_provider,
                  desc):
@@ -80,6 +83,7 @@ class MapData(DB.Model):
         self.address = address,
         self.isp_provider = isp_provider
         self.desc = desc
+        self.tower_name = tower_name
 
     def save(self):
         DB.session.add(self)
@@ -102,6 +106,7 @@ class MapData(DB.Model):
             'desc': self.desc,
             'address': self.address,
             'isp_provider': self.isp_provider,
+            'tower_name': self.tower_name
         }
 
 
