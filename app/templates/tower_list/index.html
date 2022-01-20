@@ -223,9 +223,12 @@
                                             <td class="text-center">
                                                 <div class="dropdown">
                                                     <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        Edit
+                                                        <svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 7a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 13a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
                                                     </button>
                                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">
+                                                        <li><a class="dropdown-item" type="button" target="_blank" href="{{url_for('public_controller.public_check_location', lat=map_item.latlang.latitude, lng=map_item.latlang.longitude)}}">Lihat lokasi</a></li>
+                                                        <li><a class="dropdown-item" type="button" href="{{url_for('public_controller.public_tower_detail', tower=map_item.tower_id)}}">Daftar status</a></li>
+                                                        <li><hr class="dropdown-divider" style="border-top: 1px solid #b1b2b5!important;"></li>
                                                         <li><a class="dropdown-item" type="button" href="{{url_for('public_controller.public_move_tower')}}?tower_id={{map_item.tower_id}}">Pindah lokasi</a></li>
                                                         <li><a class="dropdown-item" type="button" href="{{url_for('public_controller.public_delete_tower', tower=map_item.tower_id)}}">Hapus titik</a></li>
                                                     </ul>
@@ -317,7 +320,7 @@
 <script src="{{ url_for('static', filename='home/js/leaflet.js')}}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('index.html loaded')
+        // console.log('index.html loaded')
 
         /**
          * 

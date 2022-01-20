@@ -225,6 +225,7 @@ def public_index():
     for tower_item in map_list:
         tower_serializer.append({
             "id": tower_item.id,
+            "tower_name": tower_item.tower_name,
             "latlang": json.loads(tower_item.latlang),
             "address": tower_item.address
         })
@@ -233,6 +234,7 @@ def public_index():
         detailed_tower_info = DB.session.query(MapData, MapDataHistory)\
             .join(MapDataHistory)\
             .filter(MapDataHistory.tower_id == map_item.id)\
+            .limit(5)\
             .all()
 
         data_serializer.append({
@@ -248,8 +250,6 @@ def public_index():
             "report": sorted([info[1].get() for info in detailed_tower_info], key=lambda i: i["report_date"], reverse=True)
         })
 
-    # print(data_serializer)
-
     return render_template(
         'home/index.html',
         user=g.user.username,
@@ -262,10 +262,20 @@ def public_index():
 @login
 def public_towerlist():
     page = request.args.get('page', 1, type=int)
+    tower_list = MapData.query.filter(MapData.is_used == True).all()
     map_data = MapData.query.filter(MapData.is_used == True)\
         .paginate(page=page, per_page=10)
 
     data_serializers = []
+    tower_serializers = []
+
+    for tower_item in tower_list:
+        tower_serializers.append({
+            "id": tower_item.id,
+            "tower_name": tower_item.tower_name,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
 
     for map_item in map_data.items:
         data_serializers.append({
@@ -281,6 +291,46 @@ def public_towerlist():
         'tower_list/index.html',
         map_list=data_serializers,
         pagination=map_data,
+        tower_list=tower_serializers
+    )
+
+
+@public.route('/tower_detail/<string:tower>')
+@login
+def public_tower_detail(tower):
+    page = request.args.get('page', 1, type=int)
+    tower_id = fragment_parser(tower).get('id')
+
+    tower_list = MapData.query.filter(MapData.is_used == True).all()
+    tower_serializers = []
+
+    tower_raw = MapData.query.get(tower_id)
+    history_data = MapDataHistory.query\
+        .filter(MapDataHistory.tower_id == tower_raw.id)\
+        .paginate(page=page, per_page=5)
+
+    for tower_item in tower_list:
+        tower_serializers.append({
+            "id": tower_item.id,
+            "tower_name": tower_item.tower_name,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
+
+    tower_data = {
+        "tower_id": f'tower#{tower_raw.id}',
+        "tower_name": tower_raw.tower_name,
+        "latlang": json.loads(tower_raw.latlang),
+        "address": tower_raw.address,
+        "desc": tower_raw.desc,
+        "isp_provider": tower_raw.isp_provider,
+    }
+
+    return render_template(
+        'tower_management/index.html',
+        tower_detail=tower_data,
+        tower_report=history_data,
+        tower_list=tower_serializers
     )
 
 

@@ -206,7 +206,7 @@
               <select name="tower-damage-coord" class="form-select" id="tower-damage-coord" required>
                 <option selected disabled value="">Pilih titik koordinat</option>                  
                 {% for tower in tower_list %}
-                <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.address|capitalize }}, Koordinat ({{ tower.latlang.latitude }}, {{ tower.latlang.longitude }})</option>
+                <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.tower_name }}</option>
                 {% endfor %}
               </select>
               <div id="tower-damage-coord__help" class="form-text">Pilih titik koordinat</div>
@@ -254,7 +254,7 @@
               <select name="tower-repair-coord" class="form-select" id="tower-repair-coord" required>
                 <option selected disabled value="">Pilih titik koordinat</option>                  
                 {% for tower in tower_list %}
-                <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.address|capitalize }}, Koordinat ({{ tower.latlang.latitude }}, {{ tower.latlang.longitude }})</option>
+                <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.tower_name }}</option>
                 {% endfor %}
               </select>
               <div id="tower-repair-coord__help" class="form-text">Pilih titik koordinat</div>
