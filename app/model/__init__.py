@@ -150,7 +150,7 @@ class MapDataHistory(DB.Model):
                 "report_date": self.report_date,
                 "report_desc": self.report_desc,
                 "address_history": self.address_history,
-                "move_from": json.loads(self.move_from)
+                "move_from": self.move_from
             }
 
         else:

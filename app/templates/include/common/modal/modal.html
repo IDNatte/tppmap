@@ -76,7 +76,7 @@
                                   <p>{{ status.report_desc }}</p>
                                   {% if status.status == 'perpindahan' %}
                                   <p>Dipindahkan ke alamat <strong>{{map_data.address}}</strong> dari <strong>{{status.address_history}}</strong></p>
-                                  <a class="btn btn-secondary" target="_blank" href="{{url_for('public_controller.public_check_location')}}?lat={{status.move_from.latitude}}&lng={{status.move_from.longitude}}">Lihat posisi awal</a>
+                                  <a class="btn btn-secondary" target="_blank" href="{{url_for('public_controller.public_check_location')}}?lat={{status.move_from|parse_coords_latitude}}&lng={{status.move_from|parse_coords_longitude}}">Lihat posisi awal</a>
                                   {% endif %}
                                   <div class="text-end">
                                     <span class="text-muted fw-bold" style="font-size: small;">Tanggal {{ status.report_date.strftime("%d %B %Y") }}</span>

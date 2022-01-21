@@ -72,6 +72,12 @@ def parse_coords_longitude(context):
     longitude = json.loads(context).get('longitude')
     return longitude
 
+
+@public.app_template_filter()
+def parse_coords_to_json(context):
+    parser = json.dumps(context)
+    return parser
+
 # controller view filter ---------->
 
 
@@ -515,72 +521,72 @@ def public_report_damage(report_type):
     return redirect(url_for('public_controller.public_index'))
 
 
-@public.route('/recap', methods=['GET', 'POST'])
-@login
-def public_data_recap():
-    if request.method == 'GET':
-        recap_type = request.args.get('type', None)
-        map_list = MapData.query.all()
-        tower_serializer = []
-        for tower_item in map_list:
-            tower_serializer.append({
-                "id": tower_item.id,
-                "latlang": json.loads(tower_item.latlang),
-                "address": tower_item.address
-            })
+# @public.route('/recap', methods=['GET', 'POST'])
+# @login
+# def public_data_recap():
+#     if request.method == 'GET':
+#         recap_type = request.args.get('type', None)
+#         map_list = MapData.query.all()
+#         tower_serializer = []
+#         for tower_item in map_list:
+#             tower_serializer.append({
+#                 "id": tower_item.id,
+#                 "latlang": json.loads(tower_item.latlang),
+#                 "address": tower_item.address
+#             })
 
-        if recap_type == 'error':
-            return render_template(
-                'recap/index.html',
-                page_title="Rekap kerusakan",
-                subtitle='Rekap daftar tower yang mengalami kerusakan',
-                tower_list=tower_serializer
-            )
+#         if recap_type == 'error':
+#             return render_template(
+#                 'recap/index.html',
+#                 page_title="Rekap kerusakan",
+#                 subtitle='Rekap daftar tower yang mengalami kerusakan',
+#                 tower_list=tower_serializer
+#             )
 
-        elif recap_type == 'repairement':
-            return render_template(
-                'recap/index.html',
-                page_title="Rekap perbaikan",
-                subtitle='Rekap daftar tower dalam perbaikan',
-                tower_list=tower_serializer
-            )
+#         elif recap_type == 'repairement':
+#             return render_template(
+#                 'recap/index.html',
+#                 page_title="Rekap perbaikan",
+#                 subtitle='Rekap daftar tower dalam perbaikan',
+#                 tower_list=tower_serializer
+#             )
 
-        elif recap_type == 'movement':
-            return render_template(
-                'recap/index.html',
-                page_title="Rekap perpindahan",
-                subtitle='Rekap daftar tower dipindahkan',
-                tower_list=tower_serializer
-            )
+#         elif recap_type == 'movement':
+#             return render_template(
+#                 'recap/index.html',
+#                 page_title="Rekap perpindahan",
+#                 subtitle='Rekap daftar tower dipindahkan',
+#                 tower_list=tower_serializer
+#             )
 
-        elif recap_type == 'map-dl':
-            return render_template(
-                'recap/index.html',
-                page_title="Download map",
-                subtitle='Download map',
-                tower_list=tower_serializer
-            )
+#         elif recap_type == 'map-dl':
+#             return render_template(
+#                 'recap/index.html',
+#                 page_title="Download map",
+#                 subtitle='Download map',
+#                 tower_list=tower_serializer
+#             )
 
-        elif recap_type == 'all':
-            return render_template(
-                'recap/index.html',
-                page_title="Rekap keseluruhan",
-                subtitle='Rekap data seluruh tower',
-                tower_list=tower_serializer
-            )
+#         elif recap_type == 'all':
+#             return render_template(
+#                 'recap/index.html',
+#                 page_title="Rekap keseluruhan",
+#                 subtitle='Rekap data seluruh tower',
+#                 tower_list=tower_serializer
+#             )
 
-        else:
-            return redirect(url_for('public_controller.public_index'))
+#         else:
+#             return redirect(url_for('public_controller.public_index'))
 
-    elif request.method == 'POST':
-        test = request.get_json()
-        print(test.get('endDate', None))
-        return jsonify({
-            "test": "result"
-        })
+#     elif request.method == 'POST':
+#         test = request.get_json()
+#         print(test.get('endDate', None))
+#         return jsonify({
+#             "test": "result"
+#         })
 
-    else:
-        return redirect(url_for('public_controller.public_index'))
+#     else:
+#         return redirect(url_for('public_controller.public_index'))
 
 
 @public.route('/kerusakan', methods=['GET', 'POST'])
@@ -916,6 +922,135 @@ def public_moved_print():
         'recap/print/moved_print.html',
         report_data=data,
         time_spans=time_spans
+    )
+
+
+@public.route('/report', methods=['GET', 'POST'])
+@login
+def public_report():
+    PAGE_LIMIT = 10
+    tower_list = MapData.query.filter(MapData.is_used == True).all()
+    filter_date_start = request.args.get('date-start', None)
+    filter_date_end = request.args.get('date-end', None)
+    page = request.args.get('page', 1, type=int)
+
+    tower_serializers = []
+    filter = None
+
+    for tower_item in tower_list:
+        tower_serializers.append({
+            "id": tower_item.id,
+            "tower_name": tower_item.tower_name,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
+
+    data = DB.session.query(MapData, MapDataHistory)\
+        .join(MapDataHistory)\
+        .filter(MapData.is_used == True)\
+        .order_by(MapDataHistory.report_date.desc())\
+        .paginate(page=page, per_page=10)
+
+    if (filter_date_start is not None and filter_date_end is not None):
+        converted_start_date = datetime.datetime.strptime(
+            filter_date_start,
+            "%Y-%m-%d"
+        )
+
+        converted_end_date = datetime.datetime.strptime(
+            filter_date_end,
+            "%Y-%m-%d"
+        )
+
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.report_date >= converted_start_date,
+                MapDataHistory.report_date <= converted_end_date)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .paginate(page=page, per_page=10)
+
+        filter = {
+            'start_date': filter_date_start,
+            'end_date': filter_date_end
+        }
+
+    return render_template(
+        'recap/report.html',
+        report_lists=data,
+        filters=filter,
+        tower_list=tower_serializers
+    )
+
+
+@public.route('/laporan/print')
+@login
+def public_report_print():
+    filters = request.args.get('filters')
+
+    if filters != 'none':
+        date = json.loads(filters)
+
+        date_start = datetime.datetime.strptime(
+            date.get('start_date'),
+            "%Y-%m-%d"
+        )
+
+        date_end = datetime.datetime.strptime(
+            date.get('end_date'),
+            "%Y-%m-%d"
+        )
+
+        time_spans = {
+            'start_date': date_start,
+            'end_date': date_end
+        }
+
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.report_date >= date_start,
+                MapDataHistory.report_date <= date_end)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .all()
+
+    elif filters == 'none':
+        time_spans = 'none'
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(MapData.is_used == True)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .all()
+
+    return render_template(
+        'recap/print/report_print.html',
+        report_data=data,
+        time_spans=time_spans
+    )
+
+
+@public.route('/download_map')
+@login
+def public_download_map():
+    tower_list = MapData.query.filter(MapData.is_used == True).all()
+    tower_serializers = []
+    data_serializers = []
+
+    for tower_item in tower_list:
+        data_serializers.append({})
+
+        tower_serializers.append({
+            "id": tower_item.id,
+            "tower_name": tower_item.tower_name,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
+    return render_template(
+        'recap/dl-map.html',
+        tower_list=tower_serializers,
+
     )
 
 
