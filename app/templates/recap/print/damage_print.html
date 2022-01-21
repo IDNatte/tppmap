@@ -1,0 +1,124 @@
+{% extends 'layout/print-base.html' %}
+
+{% block title %}Laporan kerusakan tower{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block inlineStyle %}
+<style>
+  .title {
+    text-align: center!important;
+    padding: 2rem 0px;
+  }
+
+  .table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse!important;
+    /* border: 1px solid black!important; */
+
+    width: 100%;
+  }
+
+  .table td, .table th {
+    border-bottom: 1px solid black!important;
+    padding: 8px;
+  }
+
+  .table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+  }
+
+  .print-button {
+    padding: 20px 0px;
+    text-align: end;
+  }
+
+  .print-button button {
+    background-color: white!important;
+    border: 1px solid black;
+    border-radius: 2px;
+    padding: 13px 19px;
+  }
+
+  .content {
+    height: auto!important;
+    padding: 3rem 0px;
+  }
+
+  @media print {
+    .no-print {
+      display: none!important;
+    }
+
+    .content {
+      height: auto!important;
+    }
+  }
+
+  @page { size: legal; margin: 0cm; }
+
+</style>
+{% endblock %}
+
+{% block content%}
+
+<div class="content sheet padding-10mm">
+  <div class="title">
+    <h1>Laporan Kerusakan</h1>
+    {% if time_spans != 'none'%}
+    <span>Laporan kerusakan tower per tanggal {{ time_spans.start_date.strftime("%A, %d/%m/%Y") }} hingga {{ time_spans.end_date.strftime("%A, %d/%m/%Y") }}</span>
+    {% else %}
+    <span>Laporan seluruh kerusakan tower</span>
+    {% endif %}
+    <span></span>
+  </div>
+
+  <div class="print-button no-print">
+    <button class="__print">Cetak</button>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">No.</th>
+        <th scope="col">Nama Tower</th>
+        <th scope="col">Alamat Tower</th>
+        <th scope="col" style="text-align: center;">Koordinat</th>
+        <th scope="col">ISP</th>
+        <th scope="col">Tanggal Kerusakan</th>
+        <th scope="col">keterangan kerusakan</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for data in report_data %}
+      <tr>
+        <th scope="row">{{ loop.index }}</th>
+        <td>{{ data.MapData.tower_name }}</td>
+        <td>{{ data.MapData.address }}</td>
+        <td>{{ data.MapData.latlang }}</td>
+        <td style="text-align: center;">{{ data.MapData.isp_provider }}</td>
+        <td>{{ data.MapDataHistory.report_date.strftime("%d/%m/%Y") }}</td>
+        <td>{{ data.MapDataHistory.report_desc }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+
+
+{% endblock %}
+
+{% block jsScript %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.__print').addEventListener('click', () => {
+      window.print()
+    })
+  })
+</script>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Report perbaikan{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='home/css/style.css')}}">
+<link rel="stylesheet" href="{{ url_for('static', filename='home/css/leaflet.css')}}">
+{% endblock %}
+
+{% block inlineStyle %}
+{% endblock %}
+
+{% block content%}
+
+{% include 'include/home-partial/navbar.html' %}
+
+{% include 'include/home-partial/sidebar.html' %}
+
+<main class="content pb-5">
+  {% include 'include/home-partial/content-navbar.html' %}
+
+  <div class="pt-5">
+    <div class="row">
+      <div class="col-sm-12 col-md-4 mb-4">
+        <div class="card border-0 shadow">
+          <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+            <div class="d-block mb-3 mb-sm-0">
+              <h5 class="fs-5 fw-extrabold">Filter pencarian</h5>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="container-fluid">
+              <form method="get" action="/perbaikan" class="row __filter-data">
+                <div class="col-sm-12">
+                  <label for="filter-date-start" class="form-label">Tanggal awal</label>
+                  <input type="date" name="date-start" class="form-control" value="{{filters.start_date}}" id="filter-date-start" required>
+                </div>
+                <div class="col-sm-12">
+                  <label for="filter-date-end" class="form-label">Tanggal akhir</label>
+                  <input type="date" name="date-end" class="form-control" value="{{filters.end_date}}" id="filter-date-end" required>
+                </div>
+                <div class="col-sm-12 pt-4 pb-2">
+                  <div style="height: 100%;" class="d-flex justify-content-end align-items-center align-middle">
+                    <button type="submit" class="btn btn-secondary">Filter Data</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="col-sm-12 col-md-8 lokasi-tower">
+        <div class="card bg- border-0 shadow">
+          <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+            <div class="d-block mb-3 mb-sm-0">
+              <h2 class="fs-3 fw-extrabold">Report perbaikan</h2>
+            </div>
+          </div>
+          <div class="card-body p-2">
+            <div class="container-fluid">
+              <div class="row">
+                {% if report_lists.items|length >= 1%}
+                <!-- <div class="table-responsive">
+                </div> -->
+                <table class="table mb-4 mt-4">
+                  <thead>
+                    <tr>
+                      <th scope="col">No</th>
+                      <th scope="col">Nama Tower</th>
+                      <th scope="col">Alamat</th>
+                      <th scope="col">Keterangan kerusakan</th>
+                      <th scope="col">Tanggal kerusakan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for report in report_lists.items %}
+                    <tr>
+                      <th scope="row">{{ loop.index }}</th>
+                      <td>{{ report.MapData.tower_name }}</td>
+                      <td class="text-wrap">{{ report.MapData.address }}</td>
+                      <td class="text-wrap">{{ report.MapDataHistory.report_desc }}</td>
+                      <td>{{ report.MapDataHistory.report_date.strftime("%d/%m/%Y") }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+
+                <div class="col-sm-12">
+                  <div class="d-flex justify-content-center flex-column align-items-center pt-3 pb-3">
+                      <nav>
+                        {% if filters != None %}
+                          <ul class="pagination mb-0">
+                              <li class="page-item {% if report_lists.page == 1 %} disabled {% endif %}">
+                                  <a class="page-link" href="{{ url_for('public_controller.public_repairement', page=report_lists.prev_num) }}&date-start={{filters.start_date}}&date-end={{filters.end_date}}">Previous</a>
+                              </li>
+
+                              {% for page_num in report_lists.iter_pages() %}
+                                  {% if report_lists.page == page_num  %}
+                                  <li class="page-item active">
+                                      <a class="page-link" href="{{ url_for('public_controller.public_repairement', page=page_num) }}&date-start={{filters.start_date}}&date-end={{filters.end_date}}">{{ page_num }}</a>
+                                  </li>
+                                  {% else %}
+                                  <li class="page-item">
+                                      <a class="page-link" href="{{ url_for('public_controller.public_repairement', page=page_num) }}&date-start={{filters.start_date}}&date-end={{filters.end_date}}">{{ page_num }}</a>
+                                  </li>
+                                  {% endif %}
+                              {% endfor %}
+
+                              <li class="page-item {% if report_lists.page == report_lists.pages %} disabled {% endif %}">
+                                  <a class="page-link" href="{{ url_for('public_controller.public_repairement', page=report_lists.next_num) }}&date-start={{filters.start_date}}&date-end={{filters.end_date}}">Next</a>
+                              </li>
+                          </ul>
+                        {% else %}
+                          <ul class="pagination mb-0">
+                            <li class="page-item {% if report_lists.page == 1 %} disabled {% endif %}">
+                                <a class="page-link" href="{{ url_for('public_controller.public_repairement', page=report_lists.prev_num) }}">Previous</a>
+                            </li>
+
+                            {% for page_num in report_lists.iter_pages() %}
+                                {% if report_lists.page == page_num  %}
+                                <li class="page-item active">
+                                    <a class="page-link" href="{{ url_for('public_controller.public_repairement', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                                {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('public_controller.public_repairement', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            <li class="page-item {% if report_lists.page == report_lists.pages %} disabled {% endif %}">
+                                <a class="page-link" href="{{ url_for('public_controller.public_repairement', page=report_lists.next_num) }}">Next</a>
+                            </li>
+                          </ul>
+                        {% endif %}
+                      </nav>
+
+                      <div class="pb-3 pt-4">
+                          <p class="text-muted fw-light text-capitalize" style="font-size: 13px;">
+                              menampilkan
+                              {% if report_lists.page != report_lists.pages %}
+                              {{ report_lists.page }} / <span style="font-weight: bold;">{{ report_lists.pages }}</span>
+                              {% else %}
+                              <span style="font-weight: bold;">{{ report_lists.page }}</span> / 
+                              <span style="font-weight: bold;">{{ report_lists.pages }}</span>
+                              {% endif %}
+                              halaman
+                          </p>
+                      </div>
+                  </div>
+                </div>
+
+                {% else %}
+                <h3 class="text-center">Tidak ada laporan</h3>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              {% if filters == None %}
+              <a class="btn btn-secondary me-md-2 __print" type="button" href="{{ url_for('public_controller.public_repairement_print', filters='none')}}">Print report</a>
+              {% else %}
+              <a class="btn btn-secondary me-md-2 __print" type="button" href="{{ url_for('public_controller.public_repairement_print', filters=filters|tojson)}}">Print report</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+{% include 'include/common/modal/modal.html' %}
+
+{% endblock %}
+
+{% block jsScript %}
+<!-- <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.__print').addEventListener('click', (e) => {
+      e.preventDefault()
+      window.print()
+    })
+  })
+</script> -->
+{% endblock %}

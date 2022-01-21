@@ -1,3 +1,4 @@
+from crypt import methods
 import datetime
 from os import remove
 from flask import render_template
@@ -32,8 +33,8 @@ import pprint
 public = Blueprint('public_controller', __name__)
 DEBUG_PRINT = pprint.PrettyPrinter(indent=2)
 
-
 # cookie and session fetch/set operation ---------->
+
 
 @public.before_app_request
 def logged_in_user():
@@ -56,6 +57,22 @@ def logged_in_user():
         g.remember = request.cookies.get('_remember')
 
 # cookie and session fetch/set operation ---------->
+
+# controller view filter ---------->
+
+
+@public.app_template_filter()
+def parse_coords_latitude(context):
+    latitude = json.loads(context).get('latitude')
+    return latitude
+
+
+@public.app_template_filter()
+def parse_coords_longitude(context):
+    longitude = json.loads(context).get('longitude')
+    return longitude
+
+# controller view filter ---------->
 
 
 # User login operation ---------->
@@ -566,6 +583,342 @@ def public_data_recap():
         return redirect(url_for('public_controller.public_index'))
 
 
+@public.route('/kerusakan', methods=['GET', 'POST'])
+@login
+def public_damage():
+    PAGE_LIMIT = 10
+    tower_list = MapData.query.filter(MapData.is_used == True).all()
+    filter_date_start = request.args.get('date-start', None)
+    filter_date_end = request.args.get('date-end', None)
+    page = request.args.get('page', 1, type=int)
+
+    tower_serializers = []
+    filter = None
+
+    for tower_item in tower_list:
+        tower_serializers.append({
+            "id": tower_item.id,
+            "tower_name": tower_item.tower_name,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
+
+    data = DB.session.query(MapData, MapDataHistory)\
+        .join(MapDataHistory)\
+        .filter(
+            MapData.is_used == True,
+            MapDataHistory.status == 'kerusakan')\
+        .order_by(MapDataHistory.report_date.desc())\
+        .paginate(page=page, per_page=10)
+
+    if (filter_date_start is not None and filter_date_end is not None):
+        converted_start_date = datetime.datetime.strptime(
+            filter_date_start,
+            "%Y-%m-%d"
+        )
+
+        converted_end_date = datetime.datetime.strptime(
+            filter_date_end,
+            "%Y-%m-%d"
+        )
+
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'kerusakan',
+                MapDataHistory.report_date >= converted_start_date,
+                MapDataHistory.report_date <= converted_end_date)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .paginate(page=page, per_page=10)
+
+        filter = {
+            'start_date': filter_date_start,
+            'end_date': filter_date_end
+        }
+
+    return render_template(
+        'recap/damage.html',
+        report_lists=data,
+        filters=filter,
+        tower_list=tower_serializers
+    )
+
+
+@public.route('/kerusakan/print')
+@login
+def public_damage_print():
+    filters = request.args.get('filters')
+
+    if filters != 'none':
+        date = json.loads(filters)
+
+        date_start = datetime.datetime.strptime(
+            date.get('start_date'),
+            "%Y-%m-%d"
+        )
+
+        date_end = datetime.datetime.strptime(
+            date.get('end_date'),
+            "%Y-%m-%d"
+        )
+
+        time_spans = {
+            'start_date': date_start,
+            'end_date': date_end
+        }
+
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'kerusakan',
+                MapDataHistory.report_date >= date_start,
+                MapDataHistory.report_date <= date_end)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .all()
+
+    elif filters == 'none':
+        time_spans = 'none'
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'kerusakan')\
+            .order_by(MapDataHistory.report_date.desc())\
+            .all()
+
+    return render_template(
+        'recap/print/damage_print.html',
+        report_data=data,
+        time_spans=time_spans
+    )
+
+
+@public.route('/perbaikan', methods=['GET', 'POST'])
+@login
+def public_repairement():
+    PAGE_LIMIT = 10
+    tower_list = MapData.query.filter(MapData.is_used == True).all()
+    filter_date_start = request.args.get('date-start', None)
+    filter_date_end = request.args.get('date-end', None)
+    page = request.args.get('page', 1, type=int)
+
+    tower_serializers = []
+    filter = None
+
+    for tower_item in tower_list:
+        tower_serializers.append({
+            "id": tower_item.id,
+            "tower_name": tower_item.tower_name,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
+
+    data = DB.session.query(MapData, MapDataHistory)\
+        .join(MapDataHistory)\
+        .filter(
+            MapData.is_used == True,
+            MapDataHistory.status == 'perbaikan')\
+        .order_by(MapDataHistory.report_date.desc())\
+        .paginate(page=page, per_page=10)
+
+    if (filter_date_start is not None and filter_date_end is not None):
+        converted_start_date = datetime.datetime.strptime(
+            filter_date_start,
+            "%Y-%m-%d"
+        )
+
+        converted_end_date = datetime.datetime.strptime(
+            filter_date_end,
+            "%Y-%m-%d"
+        )
+
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'perbaikan',
+                MapDataHistory.report_date >= converted_start_date,
+                MapDataHistory.report_date <= converted_end_date)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .paginate(page=page, per_page=10)
+
+        filter = {
+            'start_date': filter_date_start,
+            'end_date': filter_date_end
+        }
+
+    return render_template(
+        'recap/repairement.html',
+        report_lists=data,
+        filters=filter,
+        tower_list=tower_serializers
+    )
+
+
+@public.route('/perbaikan/print')
+@login
+def public_repairement_print():
+    filters = request.args.get('filters')
+
+    if filters != 'none':
+        date = json.loads(filters)
+
+        date_start = datetime.datetime.strptime(
+            date.get('start_date'),
+            "%Y-%m-%d"
+        )
+
+        date_end = datetime.datetime.strptime(
+            date.get('end_date'),
+            "%Y-%m-%d"
+        )
+
+        time_spans = {
+            'start_date': date_start,
+            'end_date': date_end
+        }
+
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'perbaikan',
+                MapDataHistory.report_date >= date_start,
+                MapDataHistory.report_date <= date_end)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .all()
+
+    elif filters == 'none':
+        time_spans = 'none'
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'perbaikan')\
+            .order_by(MapDataHistory.report_date.desc())\
+            .all()
+
+    return render_template(
+        'recap/print/repairement_print.html',
+        report_data=data,
+        time_spans=time_spans
+    )
+
+
+@public.route('/perpindahan', methods=['GET', 'POST'])
+@login
+def public_moved():
+    PAGE_LIMIT = 10
+    tower_list = MapData.query.filter(MapData.is_used == True).all()
+    filter_date_start = request.args.get('date-start', None)
+    filter_date_end = request.args.get('date-end', None)
+    page = request.args.get('page', 1, type=int)
+
+    tower_serializers = []
+    filter = None
+
+    for tower_item in tower_list:
+        tower_serializers.append({
+            "id": tower_item.id,
+            "tower_name": tower_item.tower_name,
+            "latlang": json.loads(tower_item.latlang),
+            "address": tower_item.address
+        })
+
+    data = DB.session.query(MapData, MapDataHistory)\
+        .join(MapDataHistory)\
+        .filter(
+            MapData.is_used == True,
+            MapDataHistory.status == 'perpindahan')\
+        .order_by(MapDataHistory.report_date.desc())\
+        .paginate(page=page, per_page=10)
+
+    if (filter_date_start is not None and filter_date_end is not None):
+        converted_start_date = datetime.datetime.strptime(
+            filter_date_start,
+            "%Y-%m-%d"
+        )
+
+        converted_end_date = datetime.datetime.strptime(
+            filter_date_end,
+            "%Y-%m-%d"
+        )
+
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'perpindahan',
+                MapDataHistory.report_date >= converted_start_date,
+                MapDataHistory.report_date <= converted_end_date)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .paginate(page=page, per_page=10)
+
+        filter = {
+            'start_date': filter_date_start,
+            'end_date': filter_date_end
+        }
+
+    return render_template(
+        'recap/moved.html',
+        report_lists=data,
+        filters=filter,
+        tower_list=tower_serializers
+    )
+
+
+@public.route('/perpindahan/print')
+@login
+def public_moved_print():
+    filters = request.args.get('filters')
+
+    if filters != 'none':
+        date = json.loads(filters)
+
+        date_start = datetime.datetime.strptime(
+            date.get('start_date'),
+            "%Y-%m-%d"
+        )
+
+        date_end = datetime.datetime.strptime(
+            date.get('end_date'),
+            "%Y-%m-%d"
+        )
+
+        time_spans = {
+            'start_date': date_start,
+            'end_date': date_end
+        }
+
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'perpindahan',
+                MapDataHistory.report_date >= date_start,
+                MapDataHistory.report_date <= date_end)\
+            .order_by(MapDataHistory.report_date.desc())\
+            .all()
+
+    elif filters == 'none':
+        time_spans = 'none'
+        data = DB.session.query(MapData, MapDataHistory)\
+            .join(MapDataHistory)\
+            .filter(
+                MapData.is_used == True,
+                MapDataHistory.status == 'perpindahan')\
+            .order_by(MapDataHistory.report_date.desc())\
+            .all()
+
+    return render_template(
+        'recap/print/moved_print.html',
+        report_data=data,
+        time_spans=time_spans
+    )
+
+
 @public.route('/check-location')
 @login
 def public_check_location():
@@ -589,50 +942,50 @@ def public_check_location():
 # Debug operation ---------->
 
 
-@public.route('/debug')
-@login
-def public_debug():
-    debugData = MapData.query.get(
-        "_6g)%CHMqyqI?{|#||n%sVA)C8TB;x6MIL1T1p\,J*PpsAwk'I"
-    )
+# @public.route('/debug')
+# @login
+# def public_debug():
+#     debugData = MapData.query.get(
+#         "_6g)%CHMqyqI?{|#||n%sVA)C8TB;x6MIL1T1p\,J*PpsAwk'I"
+#     )
 
-    loremData = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, unde rem.\
-        Dignissimos id ducimus adipisci amet nulla possimus fugit rerum, illo vel distinctio\
-        sunt ratione a esse cum odio omnis quam voluptatem, incidunt dolores? Natus ducimus\
-        quod, consequuntur voluptatem quasi error, soluta possimus voluptate accusantium porro\
-        reprehenderit sequi rem sunt eos iusto sint quo voluptates nemo et, deserunt quae? Facere,\
-        distinctio sequi quisquam laborum corrupti expedita sint fugit laboriosam mollitia voluptates\
-        nulla voluptas modi accusantium repellat dignissimos ea, excepturi iusto unde veniam cupiditate.\
-        Distinctio perferendis tempora quibusdam doloremque labore accusantium velit, et laudantium. Porro\
-        ad a commodi cumque, quasi fugit maiores reiciendis inventore! Odit, fugiat saepe. Ad minus\
-        repellendus dolorum modi rerum quis quidem, ipsam vitae sint in necessitatibus excepturi, maxime\
-        totam iste sapiente commodi impedit unde aperiam hic, culpa non. Tempora deleniti tempore iste quam\
-        enim sint. Dolor accusantium, sunt atque nam praesentium, reiciendis pariatur culpa asperiores\
-        cupiditate ipsa animi porro beatae illum quae odit. Rerum autem fugit soluta quibusdam quam eos\
-        provident nam ea, saepe, corporis excepturi? Sequi praesentium tenetur recusandae fuga, dicta ipsa.\
-        Aliquam iure, porro sapiente, aspernatur voluptatibus animi nostrum, cumque sunt sint doloremque\
-        laborum hic totam. Beatae, maxime. Sunt obcaecati, quo eum nobis suscipit similique!"
+#     loremData = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, unde rem.\
+#         Dignissimos id ducimus adipisci amet nulla possimus fugit rerum, illo vel distinctio\
+#         sunt ratione a esse cum odio omnis quam voluptatem, incidunt dolores? Natus ducimus\
+#         quod, consequuntur voluptatem quasi error, soluta possimus voluptate accusantium porro\
+#         reprehenderit sequi rem sunt eos iusto sint quo voluptates nemo et, deserunt quae? Facere,\
+#         distinctio sequi quisquam laborum corrupti expedita sint fugit laboriosam mollitia voluptates\
+#         nulla voluptas modi accusantium repellat dignissimos ea, excepturi iusto unde veniam cupiditate.\
+#         Distinctio perferendis tempora quibusdam doloremque labore accusantium velit, et laudantium. Porro\
+#         ad a commodi cumque, quasi fugit maiores reiciendis inventore! Odit, fugiat saepe. Ad minus\
+#         repellendus dolorum modi rerum quis quidem, ipsam vitae sint in necessitatibus excepturi, maxime\
+#         totam iste sapiente commodi impedit unde aperiam hic, culpa non. Tempora deleniti tempore iste quam\
+#         enim sint. Dolor accusantium, sunt atque nam praesentium, reiciendis pariatur culpa asperiores\
+#         cupiditate ipsa animi porro beatae illum quae odit. Rerum autem fugit soluta quibusdam quam eos\
+#         provident nam ea, saepe, corporis excepturi? Sequi praesentium tenetur recusandae fuga, dicta ipsa.\
+#         Aliquam iure, porro sapiente, aspernatur voluptatibus animi nostrum, cumque sunt sint doloremque\
+#         laborum hic totam. Beatae, maxime. Sunt obcaecati, quo eum nobis suscipit similique!"
 
-    debugData.report.append(
-        MapDataHistory(
-            report_date=datetime.datetime.now(),
-            status="perpindahan",
-            report_desc=loremData,
-            move_from=json.dumps({
-                "latitude": "-2.9348426",
-                "longitude": "115.1660467"
-            })
-        )
-        # MapDataHistory(
-        #     report_date=datetime.datetime.now(),
-        #     status="perbaikan",
-        #     report_desc=loremData,
-        #     move_from=None
-        # )
-    )
+#     debugData.report.append(
+#         MapDataHistory(
+#             report_date=datetime.datetime.now(),
+#             status="perpindahan",
+#             report_desc=loremData,
+#             move_from=json.dumps({
+#                 "latitude": "-2.9348426",
+#                 "longitude": "115.1660467"
+#             })
+#         )
+#         # MapDataHistory(
+#         #     report_date=datetime.datetime.now(),
+#         #     status="perbaikan",
+#         #     report_desc=loremData,
+#         #     move_from=None
+#         # )
+#     )
 
-    debugData.save()
-    return redirect(url_for('public_controller.public_index'))
+#     debugData.save()
+#     return redirect(url_for('public_controller.public_index'))
 
 
 # Debug operation ---------->
