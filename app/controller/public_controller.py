@@ -1,6 +1,4 @@
 from crypt import methods
-import datetime
-from os import remove
 from flask import render_template
 from flask import make_response
 from flask import current_app
@@ -13,6 +11,8 @@ from flask import jsonify
 from flask import flash
 from flask import abort
 from flask import g
+# from os import remove
+import datetime
 
 import sqlalchemy
 import json
@@ -285,6 +285,7 @@ def public_index():
 @login
 def public_towerlist():
     page = request.args.get('page', 1, type=int)
+    search_tower = request.args.get('tower_name', None)
     tower_list = MapData.query.filter(MapData.is_used == True).all()
     map_data = MapData.query.filter(MapData.is_used == True)\
         .paginate(page=page, per_page=10)
@@ -300,15 +301,24 @@ def public_towerlist():
             "address": tower_item.address
         })
 
-    for map_item in map_data.items:
-        data_serializers.append({
-            "tower_id": f'tower${map_item.id}',
-            "tower_name": map_item.tower_name,
-            "latlang": json.loads(map_item.latlang),
-            "address": map_item.address,
-            "isp_provider": map_item.isp_provider,
-            "installation_date": map_item.installation_date,
-        })
+    if (search_tower):
+        tower = MapData.query.filter(
+            MapData.tower_name.match(search_tower),
+            MapData.is_used == True
+        )\
+            .paginate(page=page, per_page=10)
+
+        if (tower):
+            for map_item in tower.items:
+                data_serializers.append({
+                    "tower_id": f'tower${map_item.id}',
+                    "tower_name": map_item.tower_name,
+                    "latlang": json.loads(map_item.latlang),
+                    "address": map_item.address,
+                    "isp_provider": map_item.isp_provider,
+                    "installation_date": map_item.installation_date,
+                })
+
 
     return render_template(
         'tower_list/index.html',
@@ -470,11 +480,15 @@ def public_report_damage(report_type):
         if report_type == 'damage':
             report_date = request.form.get('tower-damage-date')
             damage_report = request.form.get('tower-damage-description')
-            tower_id = fragment_parser(
-                request.form.get('tower-damage-coord')).get('id')
+            tower_name = request.form.get('tower-damage-coord')
 
             try:
-                tower = MapData.query.get(tower_id)
+                tower = MapData.query.filter(
+                    MapData.is_used == True,
+                    MapData.tower_name == tower_name
+                )\
+                    .first()
+
                 tower.report.append(
                     MapDataHistory(
                         report_date=report_date,
@@ -484,6 +498,7 @@ def public_report_damage(report_type):
                         move_from=None
                     )
                 )
+
                 tower.save()
                 flash('Laporan sudah disimpan', 'success')
 
@@ -494,11 +509,16 @@ def public_report_damage(report_type):
         elif report_type == 'repr':
             report_date = request.form.get('tower-repair-date')
             repair_report = request.form.get('tower-repair-description')
-            tower_id = fragment_parser(
-                request.form.get('tower-repair-coord')).get('id')
+            tower_name = request.form.get('tower-damage-coord')
 
             try:
-                tower = MapData.query.get(tower_id)
+
+                tower = MapData.query.filter(
+                    MapData.is_used == True,
+                    MapData.tower_name == tower_name
+                )\
+                    .first()
+
                 tower.report.append(
                     MapDataHistory(
                         report_date=report_date,
@@ -519,74 +539,6 @@ def public_report_damage(report_type):
             abort(404)
 
     return redirect(url_for('public_controller.public_index'))
-
-
-# @public.route('/recap', methods=['GET', 'POST'])
-# @login
-# def public_data_recap():
-#     if request.method == 'GET':
-#         recap_type = request.args.get('type', None)
-#         map_list = MapData.query.all()
-#         tower_serializer = []
-#         for tower_item in map_list:
-#             tower_serializer.append({
-#                 "id": tower_item.id,
-#                 "latlang": json.loads(tower_item.latlang),
-#                 "address": tower_item.address
-#             })
-
-#         if recap_type == 'error':
-#             return render_template(
-#                 'recap/index.html',
-#                 page_title="Rekap kerusakan",
-#                 subtitle='Rekap daftar tower yang mengalami kerusakan',
-#                 tower_list=tower_serializer
-#             )
-
-#         elif recap_type == 'repairement':
-#             return render_template(
-#                 'recap/index.html',
-#                 page_title="Rekap perbaikan",
-#                 subtitle='Rekap daftar tower dalam perbaikan',
-#                 tower_list=tower_serializer
-#             )
-
-#         elif recap_type == 'movement':
-#             return render_template(
-#                 'recap/index.html',
-#                 page_title="Rekap perpindahan",
-#                 subtitle='Rekap daftar tower dipindahkan',
-#                 tower_list=tower_serializer
-#             )
-
-#         elif recap_type == 'map-dl':
-#             return render_template(
-#                 'recap/index.html',
-#                 page_title="Download map",
-#                 subtitle='Download map',
-#                 tower_list=tower_serializer
-#             )
-
-#         elif recap_type == 'all':
-#             return render_template(
-#                 'recap/index.html',
-#                 page_title="Rekap keseluruhan",
-#                 subtitle='Rekap data seluruh tower',
-#                 tower_list=tower_serializer
-#             )
-
-#         else:
-#             return redirect(url_for('public_controller.public_index'))
-
-#     elif request.method == 'POST':
-#         test = request.get_json()
-#         print(test.get('endDate', None))
-#         return jsonify({
-#             "test": "result"
-#         })
-
-#     else:
-#         return redirect(url_for('public_controller.public_index'))
 
 
 @public.route('/kerusakan', methods=['GET', 'POST'])

@@ -202,14 +202,13 @@
           <div class="row">            
 
             <div class="col-sm-12 col-md-12 mb-3">
-              <label class="my-1 me-2" for="tower-damage-coord">Titik koordinat</label>
-              <select name="tower-damage-coord" class="form-select" id="tower-damage-coord" required>
-                <option selected disabled value="">Pilih titik koordinat</option>                  
+              <label for="tower-damage-coord" class="form-label">Titik Koordinat</label>
+              <input class="form-control" name="tower-damage-coord" list="towerCoords" id="tower-damage-coord" placeholder="Ketik nama tower...">
+              <datalist id="towerCoords">
                 {% for tower in tower_list %}
-                <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.tower_name }}</option>
+                <option value="{{ tower.tower_name }}">
                 {% endfor %}
-              </select>
-              <div id="tower-damage-coord__help" class="form-text">Pilih titik koordinat</div>
+              </datalist>
             </div>
 
             <div class="col-sm-12 col-md-12 mb-3">
@@ -250,14 +249,13 @@
           <div class="row">            
 
             <div class="col-sm-12 col-md-12 mb-3">
-              <label class="my-1 me-2" for="tower-repair-coord">Titik koordinat</label>
-              <select name="tower-repair-coord" class="form-select" id="tower-repair-coord" required>
-                <option selected disabled value="">Pilih titik koordinat</option>                  
+              <label for="tower-damage-coord" class="form-label">Titik Koordinat</label>
+              <input class="form-control" name="tower-damage-coord" list="towerCoords" id="tower-damage-coord" placeholder="Ketik nama tower...">
+              <datalist id="towerCoords">
                 {% for tower in tower_list %}
-                <option value="tower#{{ tower.id }}-{{tower.latlang.latitude}}/{{tower.latlang.longitude}}">{{ tower.tower_name }}</option>
+                <option value="{{ tower.tower_name }}">
                 {% endfor %}
-              </select>
-              <div id="tower-repair-coord__help" class="form-text">Pilih titik koordinat</div>
+              </datalist>
             </div>
 
             <div class="col-sm-12 col-md-12 mb-3">

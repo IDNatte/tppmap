@@ -85,8 +85,8 @@
       <tr>
         <th scope="col">No.</th>
         <th scope="col">Nama Tower</th>
-        <th scope="col">Alamat Tower</th>
-        <th scope="col" style="text-align: center;">Koordinat</th>
+        <th scope="col">Alamat Baru</th>
+        <th scope="col" style="text-align: center;">Alamat Lama</th>
         <th scope="col">ISP</th>
         <th scope="col">Tanggal Kerusakan</th>
         <th scope="col">keterangan kerusakan</th>
@@ -98,8 +98,8 @@
         <th scope="row">{{ loop.index }}</th>
         <td>{{ data.MapData.tower_name }}</td>
         <td>{{ data.MapData.address }}</td>
-        <td>{{ data.MapData.latlang }}</td>
-        <td style="text-align: center;">{{ data.MapData.isp_provider }}</td>
+        <td>{{ data.MapDataHistory.address_history }}</td>
+        <td style="text-align: center; text-transform: capitalize;">{{ data.MapData.isp_provider }}</td>
         <td>{{ data.MapDataHistory.report_date.strftime("%d/%m/%Y") }}</td>
         <td>{{ data.MapDataHistory.report_desc }}</td>
       </tr>
