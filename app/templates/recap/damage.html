@@ -31,19 +31,24 @@
           <div class="card-body">
             <div class="container-fluid">
               <form method="get" action="/kerusakan" class="row __filter-data">
-                <div class="col-sm-12">
+                <div class="col-sm-12 mb-3">
                   <label for="filter-date-start" class="form-label">Tanggal awal</label>
                   <input type="date" name="date-start" class="form-control" value="{{filters.start_date}}" id="filter-date-start" required>
                 </div>
-                <div class="col-sm-12">
+                <div class="col-sm-12 mb-3">
                   <label for="filter-date-end" class="form-label">Tanggal akhir</label>
                   <input type="date" name="date-end" class="form-control" value="{{filters.end_date}}" id="filter-date-end" required>
+                </div>
+                <div class="col-sm-12">
+                  <label for="filter-tower-name" class="form-label">Nama Tower</label>
+                  <input type="text" name="tower-name" class="form-control" value="{{filters.tower_name}}" id="filter-tower-name" required>
                 </div>
                 <div class="col-sm-12 pt-4 pb-2">
                   <div style="height: 100%;" class="d-flex justify-content-end align-items-center align-middle">
                     <button type="submit" class="btn btn-secondary">Filter Data</button>
                   </div>
                 </div>
+
               </form>
             </div>
           </div>

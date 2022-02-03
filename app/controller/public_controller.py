@@ -287,8 +287,6 @@ def public_towerlist():
     page = request.args.get('page', 1, type=int)
     search_tower = request.args.get('tower_name', None)
     tower_list = MapData.query.filter(MapData.is_used == True).all()
-    map_data = MapData.query.filter(MapData.is_used == True)\
-        .paginate(page=page, per_page=10)
 
     data_serializers = []
     tower_serializers = []
@@ -303,7 +301,7 @@ def public_towerlist():
 
     if (search_tower):
         tower = MapData.query.filter(
-            MapData.tower_name.match(search_tower),
+            MapData.tower_name.contains(search_tower),
             MapData.is_used == True
         )\
             .paginate(page=page, per_page=10)
@@ -319,13 +317,33 @@ def public_towerlist():
                     "installation_date": map_item.installation_date,
                 })
 
+            return render_template(
+                'tower_list/index.html',
+                map_list=data_serializers,
+                pagination=tower,
+                tower_list=tower_serializers
+            )
 
-    return render_template(
-        'tower_list/index.html',
-        map_list=data_serializers,
-        pagination=map_data,
-        tower_list=tower_serializers
-    )
+    else:
+        map_data = MapData.query.filter(MapData.is_used == True)\
+            .paginate(page=page, per_page=10)
+
+        for map_item in map_data.items:
+            data_serializers.append({
+                "tower_id": f'tower${map_item.id}',
+                "tower_name": map_item.tower_name,
+                "latlang": json.loads(map_item.latlang),
+                "address": map_item.address,
+                "isp_provider": map_item.isp_provider,
+                "installation_date": map_item.installation_date,
+            })
+
+        return render_template(
+            'tower_list/index.html',
+            map_list=data_serializers,
+            pagination=map_data,
+            tower_list=tower_serializers
+        )
 
 
 @public.route('/tower_detail/<string:tower>')
@@ -545,6 +563,7 @@ def public_report_damage(report_type):
 @login
 def public_damage():
     PAGE_LIMIT = 10
+    tower_name = request.args.get('tower-name', None)
     tower_list = MapData.query.filter(MapData.is_used == True).all()
     filter_date_start = request.args.get('date-start', None)
     filter_date_end = request.args.get('date-end', None)
@@ -584,6 +603,7 @@ def public_damage():
             .join(MapDataHistory)\
             .filter(
                 MapData.is_used == True,
+                MapData.tower_name.contains(tower_name),
                 MapDataHistory.status == 'kerusakan',
                 MapDataHistory.report_date >= converted_start_date,
                 MapDataHistory.report_date <= converted_end_date)\
@@ -592,7 +612,8 @@ def public_damage():
 
         filter = {
             'start_date': filter_date_start,
-            'end_date': filter_date_end
+            'end_date': filter_date_end,
+            'tower_name': tower_name
         }
 
     return render_template(
