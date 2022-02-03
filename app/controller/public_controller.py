@@ -630,15 +630,15 @@ def public_damage_print():
     filters = request.args.get('filters')
 
     if filters != 'none':
-        date = json.loads(filters)
+        parsed_filter = json.loads(filters)
 
         date_start = datetime.datetime.strptime(
-            date.get('start_date'),
+            parsed_filter.get('start_date'),
             "%Y-%m-%d"
         )
 
         date_end = datetime.datetime.strptime(
-            date.get('end_date'),
+            parsed_filter.get('end_date'),
             "%Y-%m-%d"
         )
 
@@ -651,6 +651,7 @@ def public_damage_print():
             .join(MapDataHistory)\
             .filter(
                 MapData.is_used == True,
+                MapData.tower_name.contains(parsed_filter.get('tower_name')),
                 MapDataHistory.status == 'kerusakan',
                 MapDataHistory.report_date >= date_start,
                 MapDataHistory.report_date <= date_end)\
@@ -678,6 +679,7 @@ def public_damage_print():
 @login
 def public_repairement():
     PAGE_LIMIT = 10
+    tower_name = request.args.get('tower-name', None)
     tower_list = MapData.query.filter(MapData.is_used == True).all()
     filter_date_start = request.args.get('date-start', None)
     filter_date_end = request.args.get('date-end', None)
@@ -717,6 +719,7 @@ def public_repairement():
             .join(MapDataHistory)\
             .filter(
                 MapData.is_used == True,
+                MapData.tower_name.contains(tower_name),
                 MapDataHistory.status == 'perbaikan',
                 MapDataHistory.report_date >= converted_start_date,
                 MapDataHistory.report_date <= converted_end_date)\
@@ -725,7 +728,9 @@ def public_repairement():
 
         filter = {
             'start_date': filter_date_start,
-            'end_date': filter_date_end
+            'end_date': filter_date_end,
+            'tower_name': tower_name
+
         }
 
     return render_template(
@@ -742,15 +747,15 @@ def public_repairement_print():
     filters = request.args.get('filters')
 
     if filters != 'none':
-        date = json.loads(filters)
+        parsed_filter = json.loads(filters)
 
         date_start = datetime.datetime.strptime(
-            date.get('start_date'),
+            parsed_filter.get('start_date'),
             "%Y-%m-%d"
         )
 
         date_end = datetime.datetime.strptime(
-            date.get('end_date'),
+            parsed_filter.get('end_date'),
             "%Y-%m-%d"
         )
 
@@ -763,6 +768,7 @@ def public_repairement_print():
             .join(MapDataHistory)\
             .filter(
                 MapData.is_used == True,
+                MapData.tower_name.contains(parsed_filter.get('tower_name')),
                 MapDataHistory.status == 'perbaikan',
                 MapDataHistory.report_date >= date_start,
                 MapDataHistory.report_date <= date_end)\
@@ -790,6 +796,7 @@ def public_repairement_print():
 @login
 def public_moved():
     PAGE_LIMIT = 10
+    tower_name = request.args.get('tower-name', None)
     tower_list = MapData.query.filter(MapData.is_used == True).all()
     filter_date_start = request.args.get('date-start', None)
     filter_date_end = request.args.get('date-end', None)
@@ -829,6 +836,7 @@ def public_moved():
             .join(MapDataHistory)\
             .filter(
                 MapData.is_used == True,
+                MapData.tower_name.contains(tower_name),
                 MapDataHistory.status == 'perpindahan',
                 MapDataHistory.report_date >= converted_start_date,
                 MapDataHistory.report_date <= converted_end_date)\
@@ -837,7 +845,8 @@ def public_moved():
 
         filter = {
             'start_date': filter_date_start,
-            'end_date': filter_date_end
+            'end_date': filter_date_end,
+            'tower_name': tower_name
         }
 
     return render_template(
@@ -854,15 +863,15 @@ def public_moved_print():
     filters = request.args.get('filters')
 
     if filters != 'none':
-        date = json.loads(filters)
+        parsed_filter = json.loads(filters)
 
         date_start = datetime.datetime.strptime(
-            date.get('start_date'),
+            parsed_filter.get('start_date'),
             "%Y-%m-%d"
         )
 
         date_end = datetime.datetime.strptime(
-            date.get('end_date'),
+            parsed_filter.get('end_date'),
             "%Y-%m-%d"
         )
 
@@ -875,6 +884,7 @@ def public_moved_print():
             .join(MapDataHistory)\
             .filter(
                 MapData.is_used == True,
+                MapData.tower_name.contains(parsed_filter.get('tower_name')),
                 MapDataHistory.status == 'perpindahan',
                 MapDataHistory.report_date >= date_start,
                 MapDataHistory.report_date <= date_end)\
@@ -902,6 +912,7 @@ def public_moved_print():
 @login
 def public_report():
     PAGE_LIMIT = 10
+    tower_name = request.args.get('tower-name')
     tower_list = MapData.query.filter(MapData.is_used == True).all()
     filter_date_start = request.args.get('date-start', None)
     filter_date_end = request.args.get('date-end', None)
@@ -939,6 +950,7 @@ def public_report():
             .join(MapDataHistory)\
             .filter(
                 MapData.is_used == True,
+                MapData.tower_name.contains(tower_name),
                 MapDataHistory.report_date >= converted_start_date,
                 MapDataHistory.report_date <= converted_end_date)\
             .order_by(MapDataHistory.report_date.desc())\
@@ -946,7 +958,8 @@ def public_report():
 
         filter = {
             'start_date': filter_date_start,
-            'end_date': filter_date_end
+            'end_date': filter_date_end,
+            'tower_name': tower_name
         }
 
     return render_template(
@@ -963,15 +976,15 @@ def public_report_print():
     filters = request.args.get('filters')
 
     if filters != 'none':
-        date = json.loads(filters)
+        parsed_filter = json.loads(filters)
 
         date_start = datetime.datetime.strptime(
-            date.get('start_date'),
+            parsed_filter.get('start_date'),
             "%Y-%m-%d"
         )
 
         date_end = datetime.datetime.strptime(
-            date.get('end_date'),
+            parsed_filter.get('end_date'),
             "%Y-%m-%d"
         )
 
@@ -984,6 +997,7 @@ def public_report_print():
             .join(MapDataHistory)\
             .filter(
                 MapData.is_used == True,
+                MapData.tower_name.contains(parsed_filter.get('tower_name')),
                 MapDataHistory.report_date >= date_start,
                 MapDataHistory.report_date <= date_end)\
             .order_by(MapDataHistory.report_date.desc())\
