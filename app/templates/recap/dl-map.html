@@ -68,7 +68,7 @@
 
     let map = L.map('map', {
       zoom: 11,
-      layers: [satellite, cities],
+      layers: [streets, cities],
       center: [-2.894743,115.1583933],
       closePopupOnClick: false
     })
@@ -80,13 +80,7 @@
     };
 
     for (let map_item in coords) {
-      popup = L.popup()
-        .setLatLng([coords[map_item].latlang.latitude, coords[map_item].latlang.longitude])
-        .setContent(`
-          <p style="text-align: center; font-size: 12px;">Tower ${coords[map_item].tower_name}</p>
-          <p style="text-align: center; font-size: 12px;">Lokasi ${coords[map_item].address}</p>
-        `)
-        .addTo(map);
+      L.marker([coords[map_item].latlang.latitude, coords[map_item].latlang.longitude]).addTo(map)
     }
 
     L.easyPrint({
