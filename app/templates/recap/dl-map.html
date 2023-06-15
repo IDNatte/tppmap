@@ -1,58 +1,49 @@
-{% extends 'layout/base.html' %}
-
-{% block title %}Download map{% endblock %}
-
-{% block style %}
-<link rel="stylesheet" href="{{ url_for('static', filename='home/css/style.css')}}">
-<link rel="stylesheet" href="{{ url_for('static', filename='home/css/leaflet.css')}}">
-{% endblock %}
-
-{% block inlineStyle %}
+{% extends 'layout/base.html' %} {% block title %}Download map{% endblock %} {%
+block style %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='home/css/style.css')}}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='home/css/leaflet.css')}}"
+/>
+{% endblock %} {% block inlineStyle %}
 <style>
   #map {
     height: 100vh;
   }
 
-  .easyPrintHolder .a3CssClass { 
+  .easyPrintHolder .a3CssClass {
     background-image: url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDQ0NC44MzMgNDQ0LjgzMyIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDQ0LjgzMyA0NDQuODMzOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4Ij4KPGc+Cgk8Zz4KCQk8cGF0aCBkPSJNNTUuMjUsNDQ0LjgzM2gzMzQuMzMzYzkuMzUsMCwxNy03LjY1LDE3LTE3VjEzOS4xMTdjMC00LjgxNy0xLjk4My05LjM1LTUuMzgzLTEyLjQ2N0wyNjkuNzMzLDQuNTMzICAgIEMyNjYuNjE3LDEuNywyNjIuMzY3LDAsMjU4LjExNywwSDU1LjI1Yy05LjM1LDAtMTcsNy42NS0xNywxN3Y0MTAuODMzQzM4LjI1LDQzNy4xODMsNDUuOSw0NDQuODMzLDU1LjI1LDQ0NC44MzN6ICAgICBNMzcyLjU4MywxNDYuNDgzdjAuODVIMjU2LjQxN3YtMTA4LjhMMzcyLjU4MywxNDYuNDgzeiBNNzIuMjUsMzRoMTUwLjE2N3YxMzAuMzMzYzAsOS4zNSw3LjY1LDE3LDE3LDE3aDEzMy4xNjd2MjI5LjVINzIuMjVWMzR6ICAgICIgZmlsbD0iIzAwMDAwMCIvPgoJPC9nPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=);
   }
-
 </style>
-{% endblock %}
-
-{% block content%}
-
-{% include 'include/home-partial/navbar.html' %}
-
-{% include 'include/home-partial/sidebar.html' %}
+{% endblock %} {% block content%} {% include 'include/home-partial/navbar.html'
+%} {% include 'include/home-partial/sidebar.html' %}
 
 <main class="content pb-5">
-    {% include 'include/home-partial/content-navbar.html' %}
+  {% include 'include/home-partial/content-navbar.html' %}
 
-    <div class="pt-5">
-      <div class="row">
-        <div class="col-sm-12">
-          <div class="card bg- border-0 shadow">
-            <div class="card-header d-sm-flex flex-row align-items-center flex-0">
-              <div class="d-block mb-3 mb-sm-0">
-                <h2 class="fs-3 fw-extrabold">Proyeksi map</h2>
-              </div>
+  <div class="pt-5">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="card bg- border-0 shadow">
+          <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+            <div class="d-block mb-3 mb-sm-0">
+              <h2 class="fs-3 fw-extrabold">Proyeksi map</h2>
             </div>
-            <div class="card-body p-2">
-              <div class="map rounded" id="map"></div>
-            </div>
+          </div>
+          <div class="card-body p-2">
+            <div class="map rounded" id="map"></div>
           </div>
         </div>
       </div>
     </div>
-
+  </div>
 </main>
 
-{% include 'include/common/modal/modal.html' %}
-
-{% endblock %}
-
-{% block jsScript %}
+{% include 'include/common/modal/modal.html' %} {% endblock %} {% block jsScript
+%}
 <script src="{{ url_for('static', filename='home/js/leaflet.js')}}"></script>
 <script src="{{ url_for('static', filename='global/js/leaflet.easyPrint.min.js')}}"></script>
 
@@ -60,7 +51,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     let cities = L.layerGroup()
     let coords = {{tower_list|tojson}}
-    let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+    let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoicGlpbmpheSIsImEiOiJjbGl3bnphbHMwZWUyM2Vud3dnMGg4ZnR4In0.maIuBYKxahSDZK3QM6YjUw'
 
     let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>'})
     let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>'})

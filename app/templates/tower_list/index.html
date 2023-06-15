@@ -1,284 +1,413 @@
-{% extends 'layout/base.html' %}
-
-{% block title %}Daftar tower{% endblock %}
-
-{% block style %}
-<link rel="stylesheet" href="{{ url_for('static', filename='home/css/style.css')}}">
-<link rel="stylesheet" href="{{ url_for('static', filename='home/css/leaflet.css')}}">
-{% endblock %}
-
-{% block inlineStyle %}
+{% extends 'layout/base.html' %} {% block title %}Daftar tower{% endblock %} {%
+block style %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='home/css/style.css')}}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='home/css/leaflet.css')}}"
+/>
+{% endblock %} {% block inlineStyle %}
 <style>
-    .floating-addtower {
-        bottom: 40px;
-        right: 0;
-    }
+  .floating-addtower {
+    bottom: 40px;
+    right: 0;
+  }
 
-    .floating-addtower .floating-button-content {
-        /* padding: 23px 20px; */
-        margin: 23px 50px;
-    }
+  .floating-addtower .floating-button-content {
+    /* padding: 23px 20px; */
+    margin: 23px 50px;
+  }
 
-    .floating-addtower .floating-button-content a {
-        color: #a6a6d9;
-        transition-duration: .3s;
-    }
+  .floating-addtower .floating-button-content a {
+    color: #a6a6d9;
+    transition-duration: 0.3s;
+  }
 
-    .floating-addtower .floating-button-content a:hover {
-        color: #31316a;
-    }
+  .floating-addtower .floating-button-content a:hover {
+    color: #31316a;
+  }
 
-    .info .icon {
-        height: 1rem!important;
-        color: #6c757d!important;
-    }
+  .info .icon {
+    height: 1rem !important;
+    color: #6c757d !important;
+  }
 </style>
-{% endblock %}
-
-{% block content%}
-
-{% include 'include/home-partial/navbar.html' %}
-
-{% include 'include/home-partial/sidebar.html' %}
+{% endblock %} {% block content%} {% include 'include/home-partial/navbar.html'
+%} {% include 'include/home-partial/sidebar.html' %}
 
 <main class="content pb-5">
-    {% include 'include/home-partial/content-navbar.html' %}
+  {% include 'include/home-partial/content-navbar.html' %}
 
-    <div class="pt-5">
-        <div class="row">
-
-            <!-- Map Lokasi Tower -->
-            <div class="col-12 mb-4 lokasi-tower">
-                <div class="card bg- border-0 shadow">
-                    <div class="card-header d-sm-flex flex-row align-items-center flex-0">
-                        <div class="d-flex justify-content-between align-items-center" style="width: 100%">
-                            <div class="d-block  mb-3 mb-sm-0">
-                                <h2 class="fs-3 fw-extrabold">Daftar tower jaringan TPP</h2>
-                            </div>
-                            <div class="d-block">
-                                <form class="input-group" action="/tower_list" method="get">
-                                    <input type="search" class="form-control" name="tower_name" placeholder="Cari Tower...">
-                                    <button class="btn btn-outline-secondary" type="submit">Cari</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body p-2">
-                        <div class="container-fluid">
-                            <div class="row">
-                                {% if map_list|length >= 1 %}
-                                <table class="table mb-4 mt-4 table-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">No</th>
-                                            <th scope="col">Nama tower</th>
-                                            <th scope="col">alamat</th>
-                                            <th scope="col">ISP Provider</th>
-                                            <th scope="col">Tanggal pemasangan</th>
-                                            <th scope="col" class="text-center">Opsi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for map_item in map_list %}
-                                        <tr>
-                                            <th scope="row">{{ loop.index }}</th>
-                                            <td>{{ map_item.tower_name }}</td>
-                                            <td>{{ map_item.address }}</td>
-                                            <td>{{ map_item.isp_provider.upper() }}</td>
-                                            <td>{{ map_item.installation_date.strftime("%A %d/%m/%Y") }}</td>
-                                            <td class="text-center">
-                                                <div class="dropdown">
-                                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 7a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 13a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu2">
-                                                        <li><a class="dropdown-item" type="button" target="_blank" href="{{url_for('public_controller.public_check_location', lat=map_item.latlang.latitude, lng=map_item.latlang.longitude)}}">Lihat lokasi</a></li>
-                                                        <li><a class="dropdown-item" type="button" href="{{url_for('public_controller.public_tower_detail', tower=map_item.tower_id)}}">Daftar status</a></li>
-                                                        <li><hr class="dropdown-divider" style="border-top: 1px solid #b1b2b5!important;"></li>
-                                                        <li><a class="dropdown-item" type="button" href="{{url_for('public_controller.public_move_tower')}}?tower_id={{map_item.tower_id}}">Pindah lokasi</a></li>
-                                                        <li><a class="dropdown-item" type="button" href="{{url_for('public_controller.public_delete_tower', tower=map_item.tower_id)}}">Hapus titik</a></li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-
-                                <div class="col-sm-12">
-                                    <div class="d-flex justify-content-center flex-column align-items-center pt-3 pb-3">
-                                        <nav>
-                                            <ul class="pagination mb-0">
-                                                <li class="page-item {% if pagination.page == 1 %} disabled {% endif %}">
-                                                    <a class="page-link" href="{{ url_for('public_controller.public_towerlist', page=pagination.prev_num) }}">Previous</a>
-                                                </li>
-        
-                                                {% for page_num in pagination.iter_pages() %}
-                                                    {% if pagination.page == page_num  %}
-                                                    <li class="page-item active">
-                                                        <a class="page-link" href="{{ url_for('public_controller.public_towerlist', page=page_num) }}">{{ page_num }}</a>
-                                                    </li>
-                                                    {% else %}
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="{{ url_for('public_controller.public_towerlist', page=page_num) }}">{{ page_num }}</a>
-                                                    </li>
-                                                    {% endif %}
-                                                {% endfor %}
-        
-                                                <li class="page-item {% if pagination.page == pagination.pages %} disabled {% endif %}">
-                                                    <a class="page-link" href="{{ url_for('public_controller.public_towerlist', page=pagination.next_num) }}">Next</a>
-                                                </li>
-                                            </ul>
-                                        </nav>
-
-                                        <div class="pb-3 pt-4">
-                                            <p class="text-muted fw-light text-capitalize" style="font-size: 13px;">
-                                                menampilkan
-                                                {% if pagination.page != pagination.pages %}
-                                                {{ pagination.page }} / <span style="font-weight: bold;">{{ pagination.pages }}</span>
-                                                {% else %}
-                                                <span style="font-weight: bold;">{{ pagination.page }}</span> / 
-                                                <span style="font-weight: bold;">{{ pagination.pages }}</span>
-                                            
-                                                {% endif %}
-                                                halaman
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {% else %}
-                                <div class="col-sm-12">
-                                    <div class="text-center mt-3 mb-3">
-                                        <h4>Tidak ada data tower</h4>
-                                    </div>
-                                </div>
-                                {% endif %}
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="pt-5">
+    <div class="row">
+      <!-- Map Lokasi Tower -->
+      <div class="col-12 mb-4 lokasi-tower">
+        <div class="card bg- border-0 shadow">
+          <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+            <div
+              class="d-flex justify-content-between align-items-center"
+              style="width: 100%"
+            >
+              <div class="d-block mb-3 mb-sm-0">
+                <h2 class="fs-3 fw-extrabold">Daftar tower jaringan TPP</h2>
+              </div>
+              <div class="d-block">
+                <form class="input-group" action="/tower_list" method="get">
+                  <input
+                    type="search"
+                    class="form-control"
+                    name="tower_name"
+                    placeholder="Cari Tower..."
+                  />
+                  <button class="btn btn-outline-secondary" type="submit">
+                    Cari
+                  </button>
+                </form>
+              </div>
             </div>
-        </div>
-    </div>
+          </div>
+          <div class="card-body p-2">
+            <div class="container-fluid">
+              <div class="row">
+                {% if map_list|length >= 1 %}
+                <table class="table mb-4 mt-4 table-responsive">
+                  <thead>
+                    <tr>
+                      <th scope="col">No</th>
+                      <th scope="col">Nama tower</th>
+                      <th scope="col">alamat</th>
+                      <th scope="col">ISP Provider</th>
+                      <th scope="col">Tanggal pemasangan</th>
+                      <th scope="col" class="text-center">Opsi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for map_item in map_list %}
+                    <tr>
+                      <th scope="row">{{ loop.index }}</th>
+                      <td>{{ map_item.tower_name }}</td>
+                      <td>{{ map_item.address }}</td>
+                      <td>{{ map_item.isp_provider.upper() }}</td>
+                      <td>
+                        {{ map_item.installation_date.strftime("%A %d/%m/%Y") }}
+                      </td>
+                      <td class="text-center">
+                        <div class="dropdown">
+                          <button
+                            class="btn btn-secondary dropdown-toggle"
+                            type="button"
+                            id="dropdownMenu2"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                          >
+                            <svg
+                              class="icon icon-xs"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M3 7a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 13a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                clip-rule="evenodd"
+                              ></path>
+                            </svg>
+                          </button>
+                          <ul
+                            class="dropdown-menu dropdown-menu-end"
+                            aria-labelledby="dropdownMenu2"
+                          >
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                type="button"
+                                target="_blank"
+                                href="{{url_for('public_controller.public_check_location', lat=map_item.latlang.latitude, lng=map_item.latlang.longitude)}}"
+                                >Lihat lokasi</a
+                              >
+                            </li>
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                type="button"
+                                href="{{url_for('public_controller.public_tower_detail', tower=map_item.tower_id)}}"
+                                >Daftar status</a
+                              >
+                            </li>
+                            <li>
+                              <hr
+                                class="dropdown-divider"
+                                style="border-top: 1px solid #b1b2b5 !important"
+                              />
+                            </li>
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                type="button"
+                                href="{{url_for('public_controller.public_move_tower')}}?tower_id={{map_item.tower_id}}"
+                                >Pindah lokasi</a
+                              >
+                            </li>
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                type="button"
+                                href="{{url_for('public_controller.public_delete_tower', tower=map_item.tower_id)}}"
+                                >Hapus titik</a
+                              >
+                            </li>
+                          </ul>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
 
-    <div class="floating-addtower position-fixed">
-        <div class="floating-button-content rounded-circle">
-            <a href="#!" data-bs-toggle="modal" data-bs-target="#modal-add__tower-test">
-                <svg data-bs-toggle="tooltip" data-bs-placement="left" title="Tambah tower" class="icon icon-lg"
-                    fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                        clip-rule="evenodd"></path>
-                </svg>
-            </a>
-        </div>
-    </div>
+                <div class="col-sm-12">
+                  <div
+                    class="d-flex justify-content-center flex-column align-items-center pt-3 pb-3"
+                  >
+                    <nav>
+                      <ul class="pagination mb-0">
+                        <li
+                          class="page-item {% if pagination.page == 1 %} disabled {% endif %}"
+                        >
+                          <a
+                            class="page-link"
+                            href="{{ url_for('public_controller.public_towerlist', page=pagination.prev_num) }}"
+                            >Previous</a
+                          >
+                        </li>
 
+                        {% for page_num in pagination.iter_pages() %} {% if
+                        pagination.page == page_num %}
+                        <li class="page-item active">
+                          <a
+                            class="page-link"
+                            href="{{ url_for('public_controller.public_towerlist', page=page_num) }}"
+                            >{{ page_num }}</a
+                          >
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                          <a
+                            class="page-link"
+                            href="{{ url_for('public_controller.public_towerlist', page=page_num) }}"
+                            >{{ page_num }}</a
+                          >
+                        </li>
+                        {% endif %} {% endfor %}
+
+                        <li
+                          class="page-item {% if pagination.page == pagination.pages %} disabled {% endif %}"
+                        >
+                          <a
+                            class="page-link"
+                            href="{{ url_for('public_controller.public_towerlist', page=pagination.next_num) }}"
+                            >Next</a
+                          >
+                        </li>
+                      </ul>
+                    </nav>
+
+                    <div class="pb-3 pt-4">
+                      <p
+                        class="text-muted fw-light text-capitalize"
+                        style="font-size: 13px"
+                      >
+                        menampilkan {% if pagination.page != pagination.pages %}
+                        {{ pagination.page }} /
+                        <span style="font-weight: bold"
+                          >{{ pagination.pages }}</span
+                        >
+                        {% else %}
+                        <span style="font-weight: bold"
+                          >{{ pagination.page }}</span
+                        >
+                        /
+                        <span style="font-weight: bold"
+                          >{{ pagination.pages }}</span
+                        >
+
+                        {% endif %} halaman
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {% else %}
+                <div class="col-sm-12">
+                  <div class="text-center mt-3 mb-3">
+                    <h4>Tidak ada data tower</h4>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="floating-addtower position-fixed">
+    <div class="floating-button-content rounded-circle">
+      <a
+        href="#!"
+        data-bs-toggle="modal"
+        data-bs-target="#modal-add__tower-test"
+      >
+        <svg
+          data-bs-toggle="tooltip"
+          data-bs-placement="left"
+          title="Tambah tower"
+          class="icon icon-lg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+            clip-rule="evenodd"
+          ></path>
+        </svg>
+      </a>
+    </div>
+  </div>
 </main>
 
-{% include 'include/common/modal/modal.html' %}
-
-{% endblock %}
-
-{% block jsScript %}
+{% include 'include/common/modal/modal.html' %} {% endblock %} {% block jsScript
+%}
 <script src="{{ url_for('static', filename='home/js/leaflet.js')}}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // console.log('index.html loaded')
+  document.addEventListener("DOMContentLoaded", () => {
+    // console.log('index.html loaded')
 
-        /**
-         * 
-         * 
-         * Leaflet config on "pindah lokasi" modal event onClick.
-         * 
-         */
-        let addMarker
-        let Cities = L.layerGroup()
-        let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+    /**
+     *
+     *
+     * Leaflet config on "pindah lokasi" modal event onClick.
+     *
+     */
+    let addMarker;
+    let Cities = L.layerGroup();
+    let tileMap =
+      "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoicGlpbmpheSIsImEiOiJjbGl3bnphbHMwZWUyM2Vud3dnMGg4ZnR4In0.maIuBYKxahSDZK3QM6YjUw";
 
-        let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>' })
-        let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>' })
-        let satellite = L.tileLayer(tileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>' })
+    let grayscale = L.tileLayer(tileMap, {
+      id: "mapbox/light-v9",
+      tileSize: 512,
+      zoomOffset: -1,
+      attribution:
+        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>',
+    });
+    let streets = L.tileLayer(tileMap, {
+      id: "mapbox/streets-v11",
+      tileSize: 512,
+      zoomOffset: -1,
+      attribution:
+        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>',
+    });
+    let satellite = L.tileLayer(tileMap, {
+      id: "mapbox/satellite-streets-v9",
+      tileSize: 512,
+      zoomOffset: -1,
+      attribution:
+        'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>',
+    });
 
-        let map = L.map(document.querySelector('.modal-map'), {
-            zoom: 10,
-            layers: [satellite, Cities],
-            center: [-2.928304, 115.1611323]
-        })
+    let map = L.map(document.querySelector(".modal-map"), {
+      zoom: 10,
+      layers: [satellite, Cities],
+      center: [-2.928304, 115.1611323],
+    });
 
-        let baseLayers = {
-            "Streets": streets,
-            "Satellite": satellite,
-            "Grayscale": grayscale,
-        };
+    let baseLayers = {
+      Streets: streets,
+      Satellite: satellite,
+      Grayscale: grayscale,
+    };
 
-        L.control.layers(baseLayers).addTo(map);
-        L.control.scale().addTo(map)
+    L.control.layers(baseLayers).addTo(map);
+    L.control.scale().addTo(map);
 
-        /**
-         * 
-         * 
-         * updating map size due some strange erron on bootstrap 5 modal
-         * 
-         * 
-        */
+    /**
+     *
+     *
+     * updating map size due some strange erron on bootstrap 5 modal
+     *
+     *
+     */
 
-        modalElement = document.getElementById('modal-add__tower-test')
-        modalElement.addEventListener('shown.bs.modal', () => {
-            setTimeout(() => {
-                map.invalidateSize()
-            }, 1)
-        })
+    modalElement = document.getElementById("modal-add__tower-test");
+    modalElement.addEventListener("shown.bs.modal", () => {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 1);
+    });
 
-        /**
-         * 
-         * 
-         * add map event
-         * 
-         * 
-        */
+    /**
+     *
+     *
+     * add map event
+     *
+     *
+     */
 
-        map.on('click', (e) => {
-            if (addMarker) {
-                map.removeLayer(addMarker)
-            }
+    map.on("click", (e) => {
+      if (addMarker) {
+        map.removeLayer(addMarker);
+      }
 
-            addMarker = new L.Marker(e.latlng, {draggable: true}).addTo(map)
+      addMarker = new L.Marker(e.latlng, { draggable: true }).addTo(map);
 
-            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${addMarker.getLatLng().lat}&lon=${addMarker.getLatLng().lng}&format=json`)
-                .then(response => response.json())
-                .then(data => {
-                    document.querySelector('.ui-latitude').value = addMarker.getLatLng().lat
-                    document.querySelector('.latitude').value = addMarker.getLatLng().lat
-                    
-                    document.querySelector('.ui-longitude').value = addMarker.getLatLng().lng
-                    document.querySelector('.longitude').value = addMarker.getLatLng().lng
+      fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${
+          addMarker.getLatLng().lat
+        }&lon=${addMarker.getLatLng().lng}&format=json`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          document.querySelector(".ui-latitude").value =
+            addMarker.getLatLng().lat;
+          document.querySelector(".latitude").value = addMarker.getLatLng().lat;
 
-                    document.querySelector('.ui-address').value = data.display_name
-                    document.querySelector('.address').value = data.display_name
-                })
+          document.querySelector(".ui-longitude").value =
+            addMarker.getLatLng().lng;
+          document.querySelector(".longitude").value =
+            addMarker.getLatLng().lng;
 
+          document.querySelector(".ui-address").value = data.display_name;
+          document.querySelector(".address").value = data.display_name;
+        });
 
+      addMarker.on("drag", (e) => {
+        fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${
+            moveMarker.getLatLng().lat
+          }&lon=${moveMarker.getLatLng().lng}&format=json`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            document.querySelector(".ui-latitude").value =
+              addMarker.getLatLng().lat;
+            document.querySelector(".latitude").value =
+              addMarker.getLatLng().lat;
 
+            document.querySelector(".ui-longitude").value =
+              addMarker.getLatLng().lng;
+            document.querySelector(".longitude").value =
+              addMarker.getLatLng().lng;
 
-            addMarker.on('drag', (e) => {
-
-                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${moveMarker.getLatLng().lat}&lon=${moveMarker.getLatLng().lng}&format=json`)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.querySelector('.ui-latitude').value = addMarker.getLatLng().lat
-                        document.querySelector('.latitude').value = addMarker.getLatLng().lat
-
-                        document.querySelector('.ui-longitude').value = addMarker.getLatLng().lng
-                        document.querySelector('.longitude').value = addMarker.getLatLng().lng
-
-                        document.querySelector('.ui-address').value = data.display_name
-                        document.querySelector('.address').value = data.display_name
-                    })
-            })
-        })
-    })
+            document.querySelector(".ui-address").value = data.display_name;
+            document.querySelector(".address").value = data.display_name;
+          });
+      });
+    });
+  });
 </script>
 {% endblock %}

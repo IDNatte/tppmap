@@ -1,129 +1,135 @@
-{% extends 'layout/base.html' %}
-
-{% block title %}Home Page{% endblock %}
-
-{% block style %}
-<link rel="stylesheet" href="{{ url_for('static', filename='home/css/style.css')}}">
-<link rel="stylesheet" href="{{ url_for('static', filename='home/css/leaflet.css')}}">
-{% endblock %}
-
-{% block inlineStyle %}
+{% extends 'layout/base.html' %} {% block title %}Home Page{% endblock %} {%
+block style %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='home/css/style.css')}}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='home/css/leaflet.css')}}"
+/>
+{% endblock %} {% block inlineStyle %}
 <style>
-    #map {
-        height: 93.7vh;
-        border-radius: 5px;
-    }
+  #map {
+    height: 93.7vh;
+    border-radius: 5px;
+  }
 
-    #__map-pindah-modal {
-        height: 93.7vh;
-        /* width: 300px; */
-    }
+  #__map-pindah-modal {
+    height: 93.7vh;
+    /* width: 300px; */
+  }
 
-    .lokasi-tower .icon {
-        height: 1rem!important;
-        color: #6c757d!important;
-    }
+  .lokasi-tower .icon {
+    height: 1rem !important;
+    color: #6c757d !important;
+  }
 </style>
-{% endblock %}
-
-{% block content%}
-
-{% include 'include/home-partial/navbar.html' %}
-
-{% include 'include/home-partial/sidebar.html' %}
+{% endblock %} {% block content%} {% include 'include/home-partial/navbar.html'
+%} {% include 'include/home-partial/sidebar.html' %}
 
 <main class="content pb-5">
-    {% include 'include/home-partial/content-navbar.html' %}
+  {% include 'include/home-partial/content-navbar.html' %}
 
-    <div class="pt-5">
-        <div class="row">
-
-            <!-- Map Lokasi Tower -->
-            <div class="col-12 mb-4 lokasi-tower">
-                <div class="card bg- border-0 shadow">
-                    <div class="card-header d-sm-flex flex-row align-items-center flex-0">
-                        <div class="d-block mb-3 mb-sm-0">
-                            <h2 class="fs-3 fw-extrabold">Proyeksi Map Jaringan TPP</h2>
-                            <div>
-                                <svg class="icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                                <span class="fs-6 fw-bold mb-2" style="color: #6c757d !important">klik pada map jika ingin menambahkan lokasi</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body p-2">
-                        <div class="map" id="map"></div>
-                    </div>
-                </div>
+  <div class="pt-5">
+    <div class="row">
+      <!-- Map Lokasi Tower -->
+      <div class="col-12 mb-4 lokasi-tower">
+        <div class="card bg- border-0 shadow">
+          <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+            <div class="d-block mb-3 mb-sm-0">
+              <h2 class="fs-3 fw-extrabold">Proyeksi Map Jaringan TPP</h2>
+              <div>
+                <svg
+                  class="icon"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <span
+                  class="fs-6 fw-bold mb-2"
+                  style="color: #6c757d !important"
+                  >klik pada map jika ingin menambahkan lokasi</span
+                >
+              </div>
             </div>
+          </div>
+          <div class="card-body p-2">
+            <div class="map" id="map"></div>
+          </div>
         </div>
+      </div>
     </div>
-
+  </div>
 </main>
 
-{% include 'include/common/modal/modal.html' %}
-
-{% endblock %}
-
-{% block jsScript %}
+{% include 'include/common/modal/modal.html' %} {% endblock %} {% block jsScript
+%}
 <script src="{{ url_for('static', filename='home/js/leaflet.js')}}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
 
-        /** 
-         * 
-         * 
-         * Leaflet config on dashboard page
-         * 
-         * 
-        */
-        function markerClick (modalTarget) {
-            let modalElement = document.getElementById(`tower-detail__${modalTarget}`)
-            let modal = bootstrap.Modal.getOrCreateInstance(modalElement)
+      /**
+       *
+       *
+       * Leaflet config on dashboard page
+       *
+       *
+      */
+      function markerClick (modalTarget) {
+          let modalElement = document.getElementById(`tower-detail__${modalTarget}`)
+          let modal = bootstrap.Modal.getOrCreateInstance(modalElement)
 
-            modal.show()
-        }
+          modal.show()
+      }
 
-        async function addLocationModalOpen(latlng) {
-            let geoloc = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`)
+      async function addLocationModalOpen(latlng) {
+          let geoloc = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`)
 
-            if (geoloc.status === 200) {
-                let data = await geoloc.json()
-                document.forms['__injectable-form']['tower-latitude'].value = latlng.lat
-                document.forms['__injectable-form']['tower-longitude'].value = latlng.lng
-                document.forms['__injectable-form']['tower-address'].value = data.display_name
-            }
-        }
-        
-        let cities = L.layerGroup()
-        let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+          if (geoloc.status === 200) {
+              let data = await geoloc.json()
+              document.forms['__injectable-form']['tower-latitude'].value = latlng.lat
+              document.forms['__injectable-form']['tower-longitude'].value = latlng.lng
+              document.forms['__injectable-form']['tower-address'].value = data.display_name
+          }
+      }
 
-        let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>' })
-        let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>' })
-        let satellite = L.tileLayer(tileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>'})
+      let cities = L.layerGroup()
+      let tileMap = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoicGlpbmpheSIsImEiOiJjbGl3bnphbHMwZWUyM2Vud3dnMGg4ZnR4In0.maIuBYKxahSDZK3QM6YjUw'
 
-        let map = L.map('map', {
-            zoom: 11,
-            layers: [grayscale, cities],
-            center: [-2.928304, 115.1611323]
-        })
+      let grayscale = L.tileLayer(tileMap, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>' })
+      let streets = L.tileLayer(tileMap, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>' })
+      let satellite = L.tileLayer(tileMap, { id: 'mapbox/satellite-streets-v9', tileSize: 512, zoomOffset: -1, attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>, Geoservice &copy; <a href="https://nominatim.openstreetmap.org">Nominatim geoservice</a>'})
 
-        let baseLayers = {
-            "Streets": streets,
-            "Satellite": satellite,
-            "Grayscale": grayscale,
-        };
+      let map = L.map('map', {
+          zoom: 11,
+          layers: [grayscale, cities],
+          center: [-2.928304, 115.1611323]
+      })
 
-        let map_list = {{map_list|tojson}};
+      let baseLayers = {
+          "Streets": streets,
+          "Satellite": satellite,
+          "Grayscale": grayscale,
+      };
 
-        for (let map_item in map_list) {
-            L.marker([map_list[map_item].latlang.latitude, map_list[map_item].latlang.longitude])
-            .addTo(map)
-            .on('click', () => markerClick(map_list[map_item].public_id))
-        }
+      let map_list = {{map_list|tojson}};
 
-        L.control.layers(baseLayers).addTo(map);
-        L.control.scale().addTo(map)
+      for (let map_item in map_list) {
+          L.marker([map_list[map_item].latlang.latitude, map_list[map_item].latlang.longitude])
+          .addTo(map)
+          .on('click', () => markerClick(map_list[map_item].public_id))
+      }
 
-    })
+      L.control.layers(baseLayers).addTo(map);
+      L.control.scale().addTo(map)
+
+  })
 </script>
 {% endblock %}
